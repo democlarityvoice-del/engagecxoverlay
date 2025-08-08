@@ -9,12 +9,18 @@ if (!document.querySelector('link[href*="font-awesome"],link[href*="fontawesome"
 }
 
 // Change the button text
+newbutton.find('.nav-text').html("EngageCX");
+
+// Replace icon inside the background area
 newbutton.find('.nav-bg-image')
-  .css({ position: 'relative' })
+  .css({ position: 'relative', backgroundImage: 'none' })
   .html(
     '<i class="fa-regular fa-message" ' +
     'style="font-size:28px;color:white;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></i>'
   );
+
+// Append the new button
+newbutton.appendTo($('#nav-buttons'));
 
 // Click behavior
 newbutton.find('a').click(function (e) {
@@ -30,3 +36,4 @@ newbutton.find('a').click(function (e) {
 
   return false;
 });
+
