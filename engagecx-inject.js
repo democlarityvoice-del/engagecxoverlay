@@ -17,17 +17,12 @@ if (after.length) {
 
 // Reset background style and inject icon
 newbutton.find('.nav-bg-image').css({
-  // use the SVG as a mask so only the icon shape shows
-  '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-  'mask-image':        "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-  '-webkit-mask-repeat': 'no-repeat',
-  'mask-repeat':         'no-repeat',
-  '-webkit-mask-position':'center 48%',   // was center
-  'mask-position':       'center 48%',   // tiny upward nudge
-  '-webkit-mask-size':   '64% 64%',      // was 55–60%
-  'mask-size':           '64% 64%',
-  'background-color': '#ffffff'
+  'background-image': "url('/portal/img/glyphicons-halflings-white.png')",
+  'background-repeat': 'no-repeat',
+  'background-position': '-336px -24px',   // <-- START HERE; tweak this
+  'background-size': 'auto'                 // keep native pixel-perfect sprite
 });
+
 
 
 newbutton.find('a').click(function (e) {
