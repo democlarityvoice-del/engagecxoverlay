@@ -52,14 +52,15 @@ newbutton.find('a').click(function (e) {
   newbutton.addClass("nav-link-current");
   $('.navigation-title').html("EngageCX");
 
-  $('#content').html(`
-    <iframe 
-      src="https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&displayMode=AgentMode5&lang=en" 
-      style="border:none; width:100%; height:100%;" 
-      allow="geolocation; microphone; camera; clipboard-write; autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
-      allowfullscreen
-    ></iframe>
-  `);
+$('#content').html(`
+  <iframe
+    src="https://engagecx.clarityvoice.com/#/login?redirect=%2FagentConsole%2Fmessage%3FincludeWs%3Dtrue%26displayMode%3DAgentMode5%26lang%3Den"
+    style="border:none; width:100%; height:100%;"
+    allow="geolocation; microphone; camera; clipboard-write; autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
+    allowfullscreen
+  ></iframe>
+`);
+
 
   return false;
 });
