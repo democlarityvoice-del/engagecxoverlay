@@ -58,4 +58,15 @@ anchor.addEventListener('click', function (e) {
   $('.navigation-title').html("EngageCX");
 
   // known-good: login inside fixed-height iframe
-  $('#content').html
+  $('#content').html(`
+    <iframe
+      id="engagecx-frame"
+      src="https://engagecx.clarityvoice.com/#/login"
+      style="border:none; width:100%; height:800px;"
+      allow="geolocation; microphone; camera; clipboard-write; autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
+      allowfullscreen
+    ></iframe>
+  `);
+
+  return false; // belt-and-suspenders
+}, true); // <-- capture
