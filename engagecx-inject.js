@@ -53,7 +53,7 @@ newbutton.find('a').click(function (e) {
   newbutton.addClass("nav-link-current");
   $('.navigation-title').html("EngageCX");
 
-  $('#content').html("<iframe src='https://engagecx.clarityvoice.com/' width='100%' height='800px' style='border:none;' allow='clipboard-write; microphone; camera'></iframe>");
+ window.location.assign("https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&displayMode=AgentMode5&lang=en");
 
   return false;
 });
