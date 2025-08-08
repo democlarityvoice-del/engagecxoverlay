@@ -17,8 +17,8 @@ newbutton.find('.nav-bg-image')
   .attr("style",
     "position:relative;background-image:none;background-color:transparent;background-repeat:no-repeat;"
   )
+  // Updated to use the solid message icon
   .html('<i class="fa-regular fa-message" style="font-size:28px;color:white;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></i>');
-
 
 // Click behavior
 newbutton.find('a').click(function (e) {
@@ -34,4 +34,3 @@ newbutton.find('a').click(function (e) {
 
   return false;
 });
-
