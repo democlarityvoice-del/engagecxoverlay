@@ -1,8 +1,19 @@
-let existingbutton = $('#nav-music'); // change if needed
+let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
+newbutton.attr('id', 'nav-engagecx');                    // new unique id
+newbutton.find('a').attr('id', 'nav-engagecx-link');     // avoid dup anchor ids
+
 newbutton.find('.nav-text').html("EngageCX");
-newbutton.appendTo($('#nav-buttons'));
+
+// place it immediately after Call History if present; else append at end
+const after = $('#nav-callhistory');
+if (after.length) {
+  newbutton.insertAfter(after);
+} else {
+  newbutton.appendTo($('#nav-buttons'));
+}
+
 
 // Reset background style and inject icon
 newbutton.find('.nav-bg-image').css({
