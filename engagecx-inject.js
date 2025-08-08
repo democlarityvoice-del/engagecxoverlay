@@ -29,25 +29,27 @@
             return;
         }
 
-        // Create button
-        const btn = document.createElement("li");
-        btn.className = "menu-item";
-        btn.innerHTML = `<a href="#" id="engagecx-btn">EngageCX</a>`;
-        menu.appendChild(btn);
+       // Create button
+const btn = document.createElement("li");
+btn.className = "menu-item";
+btn.innerHTML = `<a href="#" id="engagecx-btn">EngageCX</a>`;
+menu.appendChild(btn);
 
-        // Click handler
-        btn.addEventListener("click", function(e) {
-            e.preventDefault();
+// Click handler (attach to the anchor)
+const anchor = btn.querySelector('#engagecx-btn');
+anchor.addEventListener("click", function(e) {
+  e.preventDefault();
 
-            const mainContent = document.querySelector("#main-content");
-            if (!mainContent) {
-                console.warn("EngageCX Button Injection: Main content container not found.");
-                return;
-            }
+  const mainContent = document.querySelector("#main-content");
+  if (!mainContent) {
+    console.warn("EngageCX Button Injection: Main content container not found.");
+    return;
+  }
 
-           mainContent.innerHTML = `
-  <iframe src="${ENGAGECX_URL}" style="width:100%; height:100%; border:none;"></iframe>
-`;
+  mainContent.innerHTML = `
+    <iframe src="${ENGAGECX_URL}" style="width:100%; height:800px; border:none;"></iframe>
+  `;
+});
 
         });
     });
