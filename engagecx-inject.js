@@ -7,9 +7,9 @@ newbutton.appendTo($('#nav-buttons'));
 
 // Set the icon in the background, matching existing menu style
 newbutton.find('.nav-bg-image')
-  .attr("style",
-    "background-position: 0; background-image: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/regular/message.svg'); background-repeat: no-repeat; background-size: 60%; background-position: center;"
-  );
+  .attr("style", "background-position: 0; background-size: cover; background-repeat: no-repeat;")
+  .html('<i class="fa-regular fa-message" style="font-size:28px;color:white;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></i>');
+
 
 // Click behavior
 newbutton.find('a').click(function (e) {
