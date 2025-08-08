@@ -1,81 +1,31 @@
-(function () {
-  // --- CONFIG ---
-  const ENGAGECX_URL = "https://engagecx.clarityvoice.com/";
+let existingbutton = $('#nav-music'); // Change selector to an existing nav item ID
+let newbutton = existingbutton.clone();
 
-  // --- Helpers ---
-  function onReady(fn) {
-    (document.readyState !== 'loading')
-      ? fn()
-      : document.addEventListener('DOMContentLoaded', fn);
-  }
+// Change the visible text
+newbutton.find('.nav-text').html("EngageCX");
 
-  function log(msg) { console.info(`[EngageCX Inject] ${msg}`); }
-  function warn(msg) { console.warn(`[EngageCX Inject] ${msg}`); }
+// Add the cloned button to the nav
+newbutton.appendTo($('#nav-buttons'));
 
-  onReady(function () {
-    // Locate the nav/menu container
-    const menu =
-      document.querySelector("#menu") ||
-      document.querySelector(".nav-buttons") ||
-      document.querySelector("nav ul");
+// Update the background image/style if needed
+newbutton.find('.nav-bg-image').attr("style", "background-position: 0; background-image: url('/path/to/icon.png');");
 
-    if (!menu) { warn("Menu container not found."); return; }
+// Click handler
+newbutton.find('a').click(function (e) {
+  e.preventDefault();
 
-    // Try to find the Call History item to insert after
-    const allLis = Array.from(menu.querySelectorAll("li"));
-    const callHistoryLi = allLis.find(li => /call\s*history/i.test(li.textContent || ""));
+  // Remove current active state from all buttons
+  $("#nav-buttons li").removeClass("nav-link-current");
+  existingbutton.removeClass("nav-link-current");
 
-    // Build the new button <li><a>
-    const li = document.createElement("li");
-    li.id = "engagecx-li";
+  // Set active state for this new button
+  newbutton.addClass("nav-link-current");
 
-    // Try to mirror classes from Call History for a perfect match
-    if (callHistoryLi && callHistoryLi.className) li.className = callHistoryLi.className;
-    else li.className = "menu-item"; // fallback
+  // Update page title
+  $('.navigation-title').html("EngageCX");
 
-    const a = document.createElement("a");
-    a.id = "engagecx-btn";
-    a.href = "#";
-    a.textContent = "EngageCX";
+  // Inject EngageCX iframe
+  $('#content').html("<iframe src='https://engagecx.clarityvoice.com/' width='100%' height='800px' style='border:none;' allow='clipboard-write; microphone; camera'></iframe>");
 
-    // Mirror anchor classes if available
-    const callHistoryA = callHistoryLi?.querySelector("a");
-    if (callHistoryA && callHistoryA.className) a.className = callHistoryA.className;
-
-    li.appendChild(a);
-
-    // Insert after Call History if found, else append to end
-    if (callHistoryLi && callHistoryLi.parentNode === menu) {
-      callHistoryLi.parentNode.insertBefore(li, callHistoryLi.nextSibling);
-      log("Inserted EngageCX button after Call History.");
-    } else {
-      menu.appendChild(li);
-      log("Inserted EngageCX button at end of menu (Call History not found).");
-    }
-
-    // Click -> swap content to iframe
-    a.addEventListener("click", function (e) {
-      e.preventDefault();
-
-      const mainContent =
-        document.querySelector("#main-content") ||
-        document.querySelector("#content") ||
-        document.querySelector(".content");
-
-      if (!mainContent) { warn("Main content container not found."); return; }
-
-      // Optional: set the page title area if present
-      const navTitle =
-        document.querySelector(".navigation-title") ||
-        document.querySelector("#navigation-title");
-      if (navTitle) navTitle.textContent = "EngageCX";
-
-      mainContent.innerHTML = `
-        <iframe src="${ENGAGECX_URL}" style="width:100%; height:800px; border:none;" allow="clipboard-write; microphone; camera"></iframe>
-      `;
-
-      log("Iframe injected.");
-    });
-  });
-})();
-
+  return false;
+});
