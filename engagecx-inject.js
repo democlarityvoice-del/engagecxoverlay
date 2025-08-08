@@ -24,11 +24,11 @@ newbutton.find('.nav-bg-image').css({
   'mask-repeat': 'no-repeat',
   '-webkit-mask-position': 'center',
   'mask-position': 'center',
-  '-webkit-mask-size': '60% 60%',
-  'mask-size': '60% 60%',
-  // the color of the icon
+  '-webkit-mask-size': '55% 55%',   // was 60%
+  'mask-size': '55% 55%',           // was 60%
   'background-color': '#fff'
 });
+
 
 
 
