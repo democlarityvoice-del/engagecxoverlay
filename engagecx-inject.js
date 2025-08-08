@@ -35,12 +35,13 @@ if (!document.getElementById('engagecx-style')) {
   style.id = 'engagecx-style';
   style.textContent = `
     /* Lighten the EngageCX tile ONLY when it's not active */
-    #nav-engagecx:not(.nav-link-current) .nav-bg-image {
+    #nav-engagecx:not(.nav-link-current) .nav-button.btn {
       filter: brightness(1.08);
     }
   `;
   document.head.appendChild(style);
 }
+
 
 
 newbutton.find('a').click(function (e) {
