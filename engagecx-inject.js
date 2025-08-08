@@ -37,36 +37,17 @@ if (!document.getElementById('engagecx-style')) {
   `;
   document.head.appendChild(style);
 }
-
-// --- Click handler (robust) ---
-// neutralize the anchor so portal router can’t hijack it
-const $a = newbutton.find('a');
-$a.attr('href', '#');
-$a.removeAttr('target');
-$a.off('click'); // clear any accidental prior binding
-
-// capture-phase listener beats document/body handlers
-const anchor = $a.get(0);
-anchor.addEventListener('click', function (e) {
+newbutton.find('a').click(function (e) {
   e.preventDefault();
-  e.stopPropagation();
-  if (e.stopImmediatePropagation) e.stopImmediatePropagation();
 
-  // set active state
   $("#nav-buttons li").removeClass("nav-link-current");
+  existingbutton.removeClass("nav-link-current");
   newbutton.addClass("nav-link-current");
   $('.navigation-title').html("EngageCX");
 
-  // known-good: login inside fixed-height iframe
-  $('#content').html(`
-    <iframe
-      id="engagecx-frame"
-      src="https://engagecx.clarityvoice.com/#/login"
-      style="border:none; width:100%; height:800px;"
-      allow="geolocation; microphone; camera; clipboard-write; autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
-      allowfullscreen
-    ></iframe>
-  `);
+  $('#content').html("<iframe src='https://engagecx.clarityvoice.com/' width='100%' height='800px' style='border:none;' allow='geolocation; microphone; camera; clipboard-write; autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock' allowfullscreen></iframe>");
 
-  return false; // belt-and-suspenders
-}, true); // <-- capture
+  return false;
+});
+
+
