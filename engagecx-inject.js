@@ -53,9 +53,10 @@ newbutton.find('a').click(function (e) {
   $('.navigation-title').html("EngageCX");
 
   $('#content').html(`
-    <iframe 
-      src="https://engagecx.clarityvoice.com/" 
-      style="border:none; width:100%; height:100%;" 
+    <iframe
+      id="engagecx-frame"
+      src="https://engagecx.clarityvoice.com/"
+      style="border:none; width:100%; height:800px;"
       allow="geolocation; microphone; camera; clipboard-write; autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
       allowfullscreen
     ></iframe>
@@ -63,4 +64,3 @@ newbutton.find('a').click(function (e) {
 
   return false;
 });
-
