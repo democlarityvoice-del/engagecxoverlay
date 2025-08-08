@@ -29,6 +29,19 @@ newbutton.find('.nav-bg-image').css({
   'background-color':    'rgba(255,255,255,0.92)'
 });
 
+// add once, after you insert the newbutton
+if (!document.getElementById('engagecx-style')) {
+  const style = document.createElement('style');
+  style.id = 'engagecx-style';
+  style.textContent = `
+    /* Lighten the EngageCX tile ONLY when it's not active */
+    #nav-engagecx:not(.nav-link-current) .nav-bg-image {
+      filter: brightness(1.08);
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 
 newbutton.find('a').click(function (e) {
   e.preventDefault();
