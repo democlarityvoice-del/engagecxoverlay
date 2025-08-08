@@ -10,27 +10,7 @@
   function log(msg){ console.info(`[EngageCX Inject] ${msg}`); }
   function warn(msg){ console.warn(`[EngageCX Inject] ${msg}`); }
 
-  onReady(function () {
-    // Host + domain guards
-    const allowedHosts = ["portal02.clarityvoice.net", "portal.clarityvoice.com"];
-    const hostMatch = allowedHosts.includes(window.location.hostname);
-
-    const domainMessage = document.getElementById('domain-message')?.textContent?.toLowerCase() || '';
-    const domainMatch = domainMessage.includes('abtesting');
-
-    if (!hostMatch || !domainMatch) {
-      log(`Skipped (hostMatch=${hostMatch}, domainMatch=${domainMatch})`);
-      return;
-    }
-    log("Conditions met.");
-
-    // Prevent duplicate injection
-    if (document.getElementById('engagecx-btn')) {
-      log("Button already present; skipping reinjection.");
-      return;
-    }
-
-    // Locate the nav/menu container
+      // Locate the nav/menu container
     const menu =
       document.querySelector("#menu") ||
       document.querySelector(".nav-buttons") ||
