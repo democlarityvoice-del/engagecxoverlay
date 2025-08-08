@@ -1,31 +1,26 @@
-let existingbutton = $('#nav-music'); // Change selector to an existing nav item ID
+let existingbutton = $('#nav-music'); // change if needed
 let newbutton = existingbutton.clone();
 
-// Change the visible text
 newbutton.find('.nav-text').html("EngageCX");
-
-// Add the cloned button to the nav
 newbutton.appendTo($('#nav-buttons'));
 
-// Update the background image/style if needed
-newbutton.find('.nav-bg-image').attr("style", "background-position: 0; background-image: url('/path/to/icon.png');");
+// Make sure Font Awesome is loaded in the page
+// Then set the background to the Font Awesome icon
+newbutton.find('.nav-bg-image')
+  .attr("style", "background: none; font-family: 'Font Awesome 6 Free'; font-weight: 400; font-size: 18px; display: flex; align-items: center; justify-content: center;")
+  .html('<i class="fa-regular fa-message"></i>');
 
-// Click handler
 newbutton.find('a').click(function (e) {
   e.preventDefault();
 
-  // Remove current active state from all buttons
   $("#nav-buttons li").removeClass("nav-link-current");
   existingbutton.removeClass("nav-link-current");
 
-  // Set active state for this new button
   newbutton.addClass("nav-link-current");
-
-  // Update page title
   $('.navigation-title').html("EngageCX");
 
-  // Inject EngageCX iframe
   $('#content').html("<iframe src='https://engagecx.clarityvoice.com/' width='100%' height='800px' style='border:none;' allow='clipboard-write; microphone; camera'></iframe>");
 
   return false;
 });
+
