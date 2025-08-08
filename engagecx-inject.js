@@ -17,11 +17,19 @@ if (after.length) {
 
 // Reset background style and inject icon
 newbutton.find('.nav-bg-image').css({
-  'background-image': "url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/regular/message.svg')",
-  'background-repeat': 'no-repeat',
-  'background-position': 'center',
-  'background-size': '60%'
+  // use the SVG as a mask so only the icon shape shows
+  '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg')",
+  'mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg')",
+  '-webkit-mask-repeat': 'no-repeat',
+  'mask-repeat': 'no-repeat',
+  '-webkit-mask-position': 'center',
+  'mask-position': 'center',
+  '-webkit-mask-size': '60% 60%',
+  'mask-size': '60% 60%',
+  // the color of the icon
+  'background-color': '#fff'
 });
+
 
 
 newbutton.find('a').click(function (e) {
