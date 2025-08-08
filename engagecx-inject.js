@@ -1,6 +1,6 @@
 (function() {
     // --- CONFIG ---
-    const ENGAGECX_URL = "https://your-engagecx-url-here.com"; // replace with actual EngageCX panel URL
+    const ENGAGECX_URL = "https://engagecx.clarityvoice.com/"; // replace with actual EngageCX panel URL
 
     // Wait for the DOM to be ready
     function onReady(callback) {
@@ -14,7 +14,7 @@
     // Main execution
     onReady(function() {
         // Check hostname and domain
-        const hostMatch = window.location.hostname.includes("portal02");
+        const hostMatch = window.location.hostname === "portal02.clarityvoice.net";
         const domainElem = document.querySelector("#domain-select option[selected]"); 
         const domainName = domainElem ? domainElem.textContent.trim().toLowerCase() : "";
 
@@ -45,10 +45,10 @@
                 return;
             }
 
-            mainContent.innerHTML = `
-                <iframe src="${https://engagecx.clarityvoice.com/}" 
-                        style="width:100%; height:100%; border:none;"></iframe>
-            `;
+           mainContent.innerHTML = `
+  <iframe src="${ENGAGECX_URL}" style="width:100%; height:100%; border:none;"></iframe>
+`;
+
         });
     });
 })();
