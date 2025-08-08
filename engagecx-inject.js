@@ -5,9 +5,13 @@ newbutton.find('.nav-text').html("EngageCX");
 newbutton.appendTo($('#nav-buttons'));
 
 // Reset background style and inject icon
-newbutton.find('.nav-bg-image')
-  .attr("style", "position: relative; background-position: 0; background-size: cover; background-repeat: no-repeat;")
-  .html('<i class="fa-regular fa-message" style="font-size:28px;color:white;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></i>');
+newbutton.find('.nav-bg-image').css({
+  'background-image': "url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/regular/message.svg')",
+  'background-repeat': 'no-repeat',
+  'background-position': 'center',
+  'background-size': '60%'
+});
+
 
 newbutton.find('a').click(function (e) {
   e.preventDefault();
