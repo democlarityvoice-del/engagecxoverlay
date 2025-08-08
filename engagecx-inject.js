@@ -37,6 +37,8 @@ if (!document.getElementById('engagecx-style')) {
 
 newbutton.find('a').on('click', function (e) {
   e.preventDefault();
+  e.stopImmediatePropagation();   // <— add this
+
   $("#nav-buttons li").removeClass("nav-link-current");
   newbutton.addClass("nav-link-current");
   $('.navigation-title').html("EngageCX");
@@ -49,4 +51,6 @@ newbutton.find('a').on('click', function (e) {
       allowfullscreen
     ></iframe>
   `);
+
+  return false;                   // <— and add this
 });
