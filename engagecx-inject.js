@@ -1,15 +1,17 @@
 let existingbutton = $('#nav-music'); // change if needed
 let newbutton = existingbutton.clone();
 
+// Change the button text
 newbutton.find('.nav-text').html("EngageCX");
 newbutton.appendTo($('#nav-buttons'));
 
-// Make sure Font Awesome is loaded in the page
-// Then set the background to the Font Awesome icon
+// Set the icon in the background, matching existing menu style
 newbutton.find('.nav-bg-image')
-  .attr("style", "background: none; font-family: 'Font Awesome 6 Free'; font-weight: 400; font-size: 18px; display: flex; align-items: center; justify-content: center;")
-  .html('<i class="fa-regular fa-message"></i>');
+  .attr("style",
+    "background-position: 0; background-image: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/regular/message.svg'); background-repeat: no-repeat; background-size: 60%; background-position: center;"
+  );
 
+// Click behavior
 newbutton.find('a').click(function (e) {
   e.preventDefault();
 
