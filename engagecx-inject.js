@@ -43,7 +43,6 @@ if (!document.getElementById('engagecx-style')) {
 }
 
 
-
 newbutton.find('a').click(function (e) {
   e.preventDefault();
 
@@ -53,7 +52,14 @@ newbutton.find('a').click(function (e) {
   newbutton.addClass("nav-link-current");
   $('.navigation-title').html("EngageCX");
 
- window.location.assign("https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&displayMode=AgentMode5&lang=en");
+  $('#content').html(`
+    <iframe 
+      src="https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&displayMode=AgentMode5&lang=en" 
+      style="border:none; width:100%; height:100%;" 
+      allow="geolocation; microphone; camera; clipboard-write; autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
+      allowfullscreen
+    ></iframe>
+  `);
 
   return false;
 });
