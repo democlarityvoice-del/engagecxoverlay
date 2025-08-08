@@ -24,9 +24,9 @@ newbutton.find('.nav-bg-image').css({
   'mask-repeat':         'no-repeat',
   '-webkit-mask-position':'center 48%',   // was center
   'mask-position':       'center 48%',   // tiny upward nudge
-  '-webkit-mask-size':   '62% 62%',      // was 55–60%
-  'mask-size':           '62% 62%',
-  'background-color':    'rgba(255,255,255,0.92)'
+  '-webkit-mask-size':   '64% 64%',      // was 55–60%
+  'mask-size':           '64% 64%',
+  'background-color': '#ffffff'
 });
 
 
