@@ -46,9 +46,9 @@ newbutton.find('a').click(function (e) {
   $('.navigation-title').html("EngageCX");
 
 $('#content').html(
-  "<iframe src='https://engagecx.clarityvoice.com/#/login' " +
-  "width='100%' height='800px' style='border:none;' " +
-  "allow='clipboard-write; microphone; camera'></iframe>"
+https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&autoLogon=true&company=Demo%20Tenant&userId=201&topLayout=false&navigationStyle=none&showAgentProfile=false
+
+
 );
 
 
