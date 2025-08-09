@@ -52,7 +52,7 @@ $('#nav-engagecx-link')
     $('.navigation-title').text("EngageCX");
 
     const company = encodeURIComponent('Demo Tenant');
-    const userId  = encodeURIComponent('201');
+    const userId  = encodeURIComponent('DemoSite');
     const src =
       'https://engagecx.clarityvoice.com/#/agentConsole/message'
       + '?includeWs=true&autoLogon=true'
