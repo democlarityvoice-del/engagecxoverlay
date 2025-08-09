@@ -45,11 +45,12 @@ newbutton.find('a').click(function (e) {
   newbutton.addClass("nav-link-current");
   $('.navigation-title').html("EngageCX");
 
-  $('#content').html(
-  "<iframe src='https://engagecx.clarityvoice.com/#/login?includeWs=0' " +
+$('#content').html(
+  "<iframe src='https://engagecx.clarityvoice.com/#/login' " +
   "width='100%' height='800px' style='border:none;' " +
   "allow='clipboard-write; microphone; camera'></iframe>"
 );
+
 
 
   return false;
