@@ -37,51 +37,50 @@ if (!document.getElementById('engagecx-style')) {
   `;
   document.head.appendChild(style);
 }
-newbutton.find('a').on('click', function (e) {
-  e.preventDefault();
+// prevent double-binding if script re-runs
+$('#nav-engagecx-link')
+  .attr('href', '#') // don't let the portal router navigate
+  .off('click')
+  .on('click', async function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation(); // <- this is the key
 
-  // nav highlight
-  $("#nav-buttons li").removeClass("nav-link-current");
-  newbutton.addClass("nav-link-current");
-  $('.navigation-title').text("EngageCX");
+    // nav highlight
+    $("#nav-buttons li").removeClass("nav-link-current");
+    $("#nav-engagecx").addClass("nav-link-current");
+    $('.navigation-title').text("EngageCX");
 
-  // build the iframe safely
-  const src = 'https://engagecx.clarityvoice.com/#/agentConsole/message'
-            + '?includeWs=true'
-            + '&autoLogon=true'
-            + '&company=Demo%20Tenant'
-            + '&userId=201'
-            + '&topLayout=false'
-            + '&navigationStyle=none'
-            + '&showAgentProfile=false';
+    const company = encodeURIComponent('Demo Tenant');
+    const userId  = encodeURIComponent('201');
+    const src =
+      'https://engagecx.clarityvoice.com/#/agentConsole/message'
+      + '?includeWs=true&autoLogon=true'
+      + `&company=${company}&userId=${userId}`
+      + '&topLayout=false&navigationStyle=none&showAgentProfile=false';
 
-  // don't blow away other scripts; use a dedicated slot
-  let slot = $('#engagecx-slot');
-  if (!slot.length) {
-    slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-  }
+    let slot = $('#engagecx-slot');
+    if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
 
-  const $iframe = $('<iframe>', {
-    id: 'engagecxFrame',
-    src,
-    width: '100%',
-    height: 800,
-    allow: 'clipboard-write; microphone; camera',
-    style: 'border:none'
+    $('#engagecxFrame').remove();
+    const $iframe = $('<iframe>', {
+      id: 'engagecxFrame', src, width: '100%', height: 800,
+      allow: 'clipboard-write; microphone; camera', style: 'border:none'
+    });
+
+    slot.empty().append($iframe);
+
+    // optional: hide the blue loader after heartbeat
+    $iframe.on('load', async () => {
+      try {
+        const r = await fetch('/portal/home/checkSession', { credentials:'include', cache:'no-store' });
+        if (r.ok) $('#flashContainer .flashMsgContainer.loader-flash').css('display','none');
+      } catch {}
+    });
+
+    return false;
   });
 
-  slot.empty().append($iframe);
-
-  // optional: clear the blue loader once the portal heartbeat says OK
-  $iframe.on('load', async () => {
-    try {
-      const r = await fetch('/portal/home/checkSession', { credentials: 'include', cache: 'no-store' });
-      if (r.ok) $('#flashContainer .flashMsgContainer.loader-flash').css('display','none');
-    } catch (_) {}
-  });
-
-  return false;
-});
 
 
 
