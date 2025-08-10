@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- this version is the one that works
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- trying the redirect here
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -62,8 +62,20 @@ if (!$slot.length) {
 }
 
 const $iframe = $('<iframe>', {
-  id: 'engagecxFrame',
-  src: 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true',
+const targetHash = '#/agentConsole/message/index?includeWs=true';
+const redirectHash = encodeURIComponent(targetHash);                      // %23/agentConsole/...
+const redirectPath = encodeURIComponent('/agentConsole/message/index?includeWs=true'); // /agentConsole/...
+
+const urls = [
+  `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,   // A
+  `https://engagecx.clarityvoice.com/#/login?redirect=${redirectPath}&t=${Date.now()}`,   // B
+  `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectHash}&t=${Date.now()}`, // C
+  `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectPath}&t=${Date.now()}`  // D
+];
+
+// pick one to try:
+$('#engagecxFrame').attr('src', urls[0]); // try A first
+
   style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
 });
 
