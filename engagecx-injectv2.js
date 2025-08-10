@@ -53,17 +53,20 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   const $content = $('#content');
   $content.empty(); // <- this prevents the home screen from bleeding through
 
-  // build a fresh slot + iframe
-  const $slot = $('<div id="engagecx-slot"></div>');
-  const $iframe = $('<iframe>', {
-    id: 'engagecxFrame',
-    // sanity check URL; swap back to EngageCX when ready
-    src: 'https://clarityvoice.com',
-    width: '100%',
-    height: 800,
-    style: 'border:none'
-  });
+// build a fresh slot + iframe
+let $slot = $('#engagecx-slot');
+if (!$slot.length) {
+  $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+} else {
+  $slot.empty();
+}
 
-  $slot.append($iframe);
-  $content.append($slot);
+const $iframe = $('<iframe>', {
+  id: 'engagecxFrame',
+  src: 'https://clarityvoice.com',
+  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+});
+
+$slot.append($iframe);
+
 });
