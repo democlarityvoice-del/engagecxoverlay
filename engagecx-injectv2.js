@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) ---
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- this version is the one that works
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
