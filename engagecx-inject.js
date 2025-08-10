@@ -28,50 +28,42 @@ newbutton.find('.nav-bg-image').css({
   'background-color':    'rgba(255,255,255,0.92)'
 });
 
-// one-time style: slight lift when not active
-if (!document.getElementById('engagecx-style')) {
-  const style = document.createElement('style');
-  style.id = 'engagecx-style';
-  style.textContent = `
-    #nav-engagecx:not(.nav-link-current) .nav-button.btn { filter: brightness(1.08); }
-  `;
-  document.head.appendChild(style);
+// ensure the tile is in the DOM first
+if (!document.getElementById('nav-engagecx')) {
+  // ... your clone/insert code above ...
 }
-$('#nav-engagecx-link')
-  .attr('href', '#')
-  .off('click')
-  .on('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
 
-    $("#nav-buttons li").removeClass("nav-link-current");
-    $("#nav-engagecx").addClass("nav-link-current");
-    $('.navigation-title').text("EngageCX");
+// Always neutralize the anchor if it exists
+$('#nav-engagecx a').attr('href', '#');
 
-    let slot = $('#engagecx-slot');
-    if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+// Delegated handler: survives DOM replacements
+$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
 
-    $('#engagecxFrame').remove();
-    const $iframe = $('<iframe>', {
-      id: 'engagecxFrame',
-      src: 'https://clarityvoice.com', // public site for sanity check
-      width: '100%',
-      height: 800,
-      style: 'border:none'
-    });
+  console.log('[EngageCX test] click handled');
 
-    slot.empty().append($iframe);
+  $("#nav-buttons li").removeClass("nav-link-current");
+  $("#nav-engagecx").addClass("nav-link-current");
+  $('.navigation-title').text("EngageCX");
+
+  let slot = $('#engagecx-slot');
+  if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+
+  $('#engagecxFrame').remove();
+  const $iframe = $('<iframe>', {
+    id: 'engagecxFrame',
+    src: 'https://clarityvoice.com,   // use example.com for sanity
+    width: '100%',
+    height: 800,
+    title: 'EngageCX Test',
+    style: 'border:none'
   });
 
+  slot.empty().append($iframe);
+});
 
-    // optional: hide the blue loader after heartbeat
-    $iframe.on('load', async () => {
-      try {
-        const r = await fetch('/portal/home/checkSession', { credentials:'include', cache:'no-store' });
-        if (r.ok) $('#flashContainer .flashMsgContainer.loader-flash').css('display','none');
-      } catch {}
-    });
 
     return false;
   });
