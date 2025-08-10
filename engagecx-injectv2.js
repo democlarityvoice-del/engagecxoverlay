@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- this version is the one that works
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- small tweak to see if we can get the agents panel redirect
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -60,11 +60,14 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $slot.empty();
   }
 
+  // ---- ONLY CHANGE: login -> redirect to Agents Panel after auth ----
+  const targetHash   = '#/agentConsole/message/index?includeWs=true';
+  const redirectHash = encodeURIComponent(targetHash); // encodes the leading #
+
   const $iframe = $('<iframe>', {
     id: 'engagecxFrame',
-    src: 'https://engagecx.clarityvoice.com/#/login',
+    src: `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,
     style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
   });
+  // -------------------------------------------------------------------
 
-  $slot.append($iframe);
-});
