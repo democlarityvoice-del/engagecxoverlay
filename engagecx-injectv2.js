@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- last run broke it, so trying one more time to inject 
+// --- Clone a tile and make "EngageCX" (appearance unchanged) ---  last run at it
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -60,36 +60,36 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $slot.empty();
   }
 
-// build URLs
-const targetHash   = '#/agentConsole/message/index?includeWs=true';
-const redirectHash = encodeURIComponent(targetHash);
-const loginUrl     = `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`;
-const directUrl    = `https://engagecx.clarityvoice.com/${targetHash}`;
+  // ================== ONLY CHANGED SECTION START ==================
+  // Try login -> redirect to Agent Panel; if blocked, fall back to direct panel
+  const targetHash   = '#/agentConsole/message/index?includeWs=true';
+  const redirectHash = encodeURIComponent(targetHash);
+  const loginUrl     = `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`;
+  const directUrl    = `https://engagecx.clarityvoice.com/${targetHash}`;
 
-// create iframe with login first
-const $iframe = $('<iframe>', {
-  id: 'engagecxFrame',
-  src: loginUrl,
-  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+  // create iframe with login first
+  const $iframe = $('<iframe>', {
+    id: 'engagecxFrame',
+    src: loginUrl,
+    allow: 'clipboard-write; microphone; camera',
+    style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+  });
+
+  $slot.append($iframe);
+
+  // if login page is frame-blocked, swap to direct route
+  let swapped = false;
+  const swapToDirect = () => {
+    if (swapped) return;
+    swapped = true;
+    console.warn('[EngageCX] login page likely blocked in iframe — falling back to direct agents panel.');
+    $('#engagecxFrame').attr('src', directUrl);
+  };
+
+  // if the login page actually loads, this fires quickly (do nothing)
+  $iframe.on('load', () => { /* loaded */ });
+
+  // but if it’s blocked, the load event may never fire; fall back after 2s
+  setTimeout(swapToDirect, 2000);
+  // =================== ONLY CHANGED SECTION END ===================
 });
-
-$slot.append($iframe);
-
-// if login page is frame-blocked, swap to direct route
-let swapped = false;
-const swapToDirect = () => {
-  if (swapped) return;
-  swapped = true;
-  $('#engagecxFrame').attr('src', directUrl);
-};
-
-// if the login page actually loads, this fires quickly
-$iframe.on('load', () => {
-  // do nothing — it loaded
-});
-
-// but if it’s blocked, the load event may never fire.
-// give it ~1200ms; if still no load, fall back.
-setTimeout(swapToDirect, 1200);
-
-
