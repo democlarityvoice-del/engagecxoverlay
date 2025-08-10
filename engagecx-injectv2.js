@@ -27,48 +27,46 @@ newbutton.find('.nav-bg-image').css({
   'background-color':    'rgba(255,255,255,0.92)'
 });
 
-// ensure the tile is in the DOM first
-if (!document.getElementById('nav-engagecx')) {
-  // ... your clone/insert code above ...
+if (!document.getElementById('engagecx-style')) {
+  const style = document.createElement('style');
+  style.id = 'engagecx-style';
+  style.textContent = `
+    #nav-engagecx:not(.nav-link-current) .nav-button.btn { filter: brightness(1.08); }
+  `;
+  document.head.appendChild(style);
 }
 
-// Always neutralize the anchor if it exists
+// neutralize the anchor
 $('#nav-engagecx a').attr('href', '#');
 
-// Delegated handler: survives DOM replacements
-$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+// CLICK -> replace #content with our iframe (only change that matters)
+$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
   e.preventDefault();
   e.stopPropagation();
-  e.stopImmediatePropagation();
-
-  console.log('[EngageCX test] click handled');
 
   $("#nav-buttons li").removeClass("nav-link-current");
   $("#nav-engagecx").addClass("nav-link-current");
   $('.navigation-title').text("EngageCX");
 
-  let slot = $('#engagecx-slot');
-  if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+  // >>> one surgical change: clear content before injecting <<<
+  const $content = $('#content');
+  $content.empty(); // <- this prevents the home screen from bleeding through
 
-  $('#engagecxFrame').remove();
+// build a fresh slot + iframe
+let $slot = $('#engagecx-slot');
+if (!$slot.length) {
+  $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+} else {
+  $slot.empty();
+}
 
-  // ---------- CHANGE ONLY THIS PART BELOW ----------
-  const targetHash  = '#/agentConsole/message/index?includeWs=true';
-  const redirectHash = encodeURIComponent(targetHash);
-  const urls = [
-    `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`
-  ];
-  const url = urls[0];
-  // --------------------------------------------------
+const $iframe = $('<iframe>', {
+  id: 'engagecxFrame',
+  src: 'https://engagecx.clarityvoice.com/#/login',
+  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+});
 
-  const $iframe = $('<iframe>', {
-    id: 'engagecxFrame',
-    src: url,
-    width: '100%',
-    height: 800,
-    title: 'EngageCX Test',
-    style: 'border:none'
-  });
+$slot.append($iframe);
 
-  slot.empty().append($iframe);
 });
