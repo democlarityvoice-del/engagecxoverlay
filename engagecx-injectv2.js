@@ -60,10 +60,11 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $slot.empty();
   }
 
- const $iframe = $('<iframe>', {
-  id: 'engagecxFrame',
-  src: 'https://engagecx.clarityvoice.com/#/login',
-  allow: 'clipboard-write; microphone; camera',
-  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+  const $iframe = $('<iframe>', {
+    id: 'engagecxFrame',
+    src: 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true',
+    style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+  });
+
+  $slot.append($iframe);
 });
-$slot.append($iframe);
