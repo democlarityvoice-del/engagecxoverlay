@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) ---  IF YOU ARE LOOKING FOR THE ONE THAT WORKS, IT'S THIS ONE
+// --- Clone a tile and make "EngageCX" (appearance unchanged) ---  working version with iframe swap at the bottom for redirect attempt
 // --- Clone a tile and make "EngageCX" (appearance unchanged) ---
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
@@ -60,11 +60,34 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $slot.empty();
   }
 
-  const $iframe = $('<iframe>', {
-    id: 'engagecxFrame',
-    src: 'https://engagecx.clarityvoice.com/#/login',
-    style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
-  });
+ // ---- build the iframe pointed at login; on 2nd load, hop to Agent Panel ----
+const targetHash = '#/agentConsole/message/index?includeWs=true';
+const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+const targetUrl  = 'https://engagecx.clarityvoice.com/' + targetHash;
 
-  $slot.append($iframe);
+const $iframe = $('<iframe>', {
+  id: 'engagecxFrame',
+  src: loginUrl,
+  allow: 'clipboard-write; microphone; camera',
+  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
 });
+
+let loadCount = 0;
+let redirected = false;
+
+// First load = login page. After they log in, the app typically does a full reload → second onload.
+$iframe.on('load', function () {
+  loadCount += 1;
+  if (loadCount >= 2 && !redirected) {
+    redirected = true;
+    $('#engagecxFrame').attr('src', targetUrl);
+  }
+});
+
+// Safety: if something weird happens and you never get a 2nd load in 3 minutes, do nothing.
+setTimeout(() => {
+  // no action; just prevents any future logic from firing accidentally
+  redirected = redirected || false;
+}, 180000);
+
+$slot.append($iframe);
