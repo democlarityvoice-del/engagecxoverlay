@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) ---
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- this version is the one that works
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -39,33 +39,32 @@ if (!document.getElementById('engagecx-style')) {
 // neutralize the anchor
 $('#nav-engagecx a').attr('href', '#');
 
-// CLICK -> replace #content with our iframe
-$(document)
-  .off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
-  .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
+// CLICK -> replace #content with our iframe (only change that matters)
+$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
 
-    $("#nav-buttons li").removeClass("nav-link-current");
-    $("#nav-engagecx").addClass("nav-link-current");
-    $('.navigation-title').text("EngageCX");
+  $("#nav-buttons li").removeClass("nav-link-current");
+  $("#nav-engagecx").addClass("nav-link-current");
+  $('.navigation-title').text("EngageCX");
 
-    const $content = $('#content');
-    $content.empty(); // prevents home screen bleed-through
+  // >>> one surgical change: clear content before injecting <<<
+  const $content = $('#content');
+  $content.empty(); // <- this prevents the home screen from bleeding through
 
-    let $slot = $('#engagecx-slot');
-    if (!$slot.length) {
-      $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-    } else {
-      $slot.empty();
-    }
+  // build a fresh slot + iframe
+  let $slot = $('#engagecx-slot');
+  if (!$slot.length) {
+    $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+  } else {
+    $slot.empty();
+  }
 
-    const $iframe = $('<iframe>', {
-      id: 'engagecxFrame',
-      // this was the effective src in your pasted version
-      src: 'https://engagecx.clarityvoice.com/#/login',
-      style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
-    });
-
-    $slot.append($iframe);
+  const $iframe = $('<iframe>', {
+    id: 'engagecxFrame',
+    src: 'https://engagecx.clarityvoice.com/#/login',
+    style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
   });
+
+  $slot.append($iframe);
+});
