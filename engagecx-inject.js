@@ -51,7 +51,7 @@ $(document)
     const $iframe = $('<iframe>', {
       id: 'engagecxFrame',
       // Use a site that allows iframing for the sanity check:
-      src: 'https:/www.clarityvoice.com',
+      src: 'https:/www.example.com',
       width: '100%',
       height: 800,
       title: 'EngageCX Test',
