@@ -37,47 +37,52 @@ if (!document.getElementById('engagecx-style')) {
   document.head.appendChild(style);
 }
 
-// click handler (same structure/appearance as before)
-$('#nav-engagecx-link')
-  .attr('href', '#') // keep portal from navigating
-  .off('click')
-  .on('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
+// click handler (unchanged structure)
+    $('#nav-engagecx-link')
+      .attr('href', '#')
+      .off('click.engagecx')
+      .on('click.engagecx', function (e) {
+        e.preventDefault(); e.stopPropagation();
 
-    // nav highlight + title (unchanged)
-    $("#nav-buttons li").removeClass("nav-link-current");
-    $("#nav-engagecx").addClass("nav-link-current");
-    $('.navigation-title').text("EngageCX");
+        $("#nav-buttons li").removeClass("nav-link-current");
+        $("#nav-engagecx").addClass("nav-link-current");
+        $('.navigation-title').text("EngageCX");
 
-    // slot handling (unchanged)
-    let slot = $('#engagecx-slot');
-    if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-    else slot.empty();
+        // slot handling (unchanged)
+        let slot = $('#engagecx-slot');
+        if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+        else slot.empty();
 
-    // ----- ONLY CHANGE STARTS HERE: build login + redirect to Agent Panel -----
-    const targetHash   = '#/agentConsole/message/index?includeWs=true';
-    const redirectHash = encodeURIComponent(targetHash);
-    const redirectPath = encodeURIComponent('/agentConsole/message/index?includeWs=true');
+        // build login → redirect to Agent Panel (no tenant hardcode)
+        const targetHash   = '#/agentConsole/message/index?includeWs=true';
+        const redirectHash = encodeURIComponent(targetHash);
+        const redirectPath = encodeURIComponent('/agentConsole/message/index?includeWs=true');
 
-    // Try A first; if it doesn't hop after login, switch to [1], [2], or [3]
-    const urls = [
-      `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,   // A (hash)
-      `https://engagecx.clarityvoice.com/#/login?redirect=${redirectPath}&t=${Date.now()}`,   // B (path)
-      `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectHash}&t=${Date.now()}`, // C (alt param)
-      `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectPath}&t=${Date.now()}`  // D (alt + path)
-    ];
-    const url = urls[0]; // try A first
-    // ----- ONLY CHANGE ENDS HERE -----
+        const urls = [
+          `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,   // A (hash)
+          `https://engagecx.clarityvoice.com/#/login?redirect=${redirectPath}&t=${Date.now()}`,   // B (path)
+          `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectHash}&t=${Date.now()}`, // C
+          `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectPath}&t=${Date.now()}`  // D
+        ];
+        const url = urls[0]; // try A first
 
-    // iframe (unchanged)
-    $('#engagecxFrame').remove();
-    const $iframe = $('<iframe>', {
-      id: 'engagecxFrame',
-      src: url,
-      allow: 'clipboard-write; microphone; camera',
-      style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
-    });
+        $('#engagecxFrame').remove();
+        const $iframe = $('<iframe>', {
+          id: 'engagecxFrame',
+          src: url,
+          allow: 'clipboard-write; microphone; camera',
+          style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+        });
 
-    slot.append($iframe);
-  });
+        slot.append($iframe);
+      });
+
+    return true;
+  }
+
+  // run now; if nav not ready, retry briefly
+  if (!mount()) {
+    const t = setInterval(() => { if (mount()) clearInterval(t); }, 200);
+    setTimeout(() => clearInterval(t), 5000); // stop trying after 5s
+  }
+})();
