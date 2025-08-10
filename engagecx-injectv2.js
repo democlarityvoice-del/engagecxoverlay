@@ -48,28 +48,23 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
   $("#nav-engagecx").addClass("nav-link-current");
   $('.navigation-title').text("EngageCX");
 
-  let slot = $('#engagecx-slot');
-  if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+  // >>> one surgical change: clear content before injecting <<<
+  const $content = $('#content');
+  $content.empty(); // <- this prevents the home screen from bleeding through
 
-  $('#engagecxFrame').remove();
-
-  // ---------- CHANGE ONLY THIS PART BELOW ----------
-  const targetHash  = '#/agentConsole/message/index?includeWs=true';
-  const redirectHash = encodeURIComponent(targetHash);
-  const urls = [
-    `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`
-  ];
-  const url = urls[0];
-  // --------------------------------------------------
+  // build a fresh slot + iframe
+  let $slot = $('#engagecx-slot');
+  if (!$slot.length) {
+    $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+  } else {
+    $slot.empty();
+  }
 
   const $iframe = $('<iframe>', {
     id: 'engagecxFrame',
-    src: url,
-    width: '100%',
-    height: 800,
-    title: 'EngageCX Test',
-    style: 'border:none'
+    src: 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true',
+    style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
   });
 
-  slot.empty().append($iframe);
+  $slot.append($iframe);
 });
