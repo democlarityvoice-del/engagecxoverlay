@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- small tweak to see if we can get the agents panel redirect
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- last run broke it, so trying one more time to inject 
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -60,14 +60,36 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $slot.empty();
   }
 
-  // ---- ONLY CHANGE: login -> redirect to Agents Panel after auth ----
-  const targetHash   = '#/agentConsole/message/index?includeWs=true';
-  const redirectHash = encodeURIComponent(targetHash); // encodes the leading #
+// build URLs
+const targetHash   = '#/agentConsole/message/index?includeWs=true';
+const redirectHash = encodeURIComponent(targetHash);
+const loginUrl     = `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`;
+const directUrl    = `https://engagecx.clarityvoice.com/${targetHash}`;
 
-  const $iframe = $('<iframe>', {
-    id: 'engagecxFrame',
-    src: `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,
-    style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
-  });
-  // -------------------------------------------------------------------
+// create iframe with login first
+const $iframe = $('<iframe>', {
+  id: 'engagecxFrame',
+  src: loginUrl,
+  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+});
+
+$slot.append($iframe);
+
+// if login page is frame-blocked, swap to direct route
+let swapped = false;
+const swapToDirect = () => {
+  if (swapped) return;
+  swapped = true;
+  $('#engagecxFrame').attr('src', directUrl);
+};
+
+// if the login page actually loads, this fires quickly
+$iframe.on('load', () => {
+  // do nothing — it loaded
+});
+
+// but if it’s blocked, the load event may never fire.
+// give it ~1200ms; if still no load, fall back.
+setTimeout(swapToDirect, 1200);
+
 
