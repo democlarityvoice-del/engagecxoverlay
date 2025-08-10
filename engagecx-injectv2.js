@@ -61,11 +61,12 @@ if (!$slot.length) {
   $slot.empty();
 }
 
-const $iframe = $('<iframe>', {
-const targetHash = '#/agentConsole/message/index?includeWs=true';
-const redirectHash = encodeURIComponent(targetHash);                      // %23/agentConsole/...
+// pick the redirect target (Agent Panel)
+const targetHash  = '#/agentConsole/message/index?includeWs=true';
+const redirectHash = encodeURIComponent(targetHash);                                // %23/agentConsole/...
 const redirectPath = encodeURIComponent('/agentConsole/message/index?includeWs=true'); // /agentConsole/...
 
+// try A first; if it doesn't hop after login, try 1→2→3
 const urls = [
   `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,   // A
   `https://engagecx.clarityvoice.com/#/login?redirect=${redirectPath}&t=${Date.now()}`,   // B
@@ -73,12 +74,18 @@ const urls = [
   `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectPath}&t=${Date.now()}`  // D
 ];
 
-// pick one to try:
-$('#engagecxFrame').attr('src', urls[0]); // try A first
+const url = urls[0]; // try A first
 
+// rebuild the slot to avoid the "home clone" bleed
+$('#engagecx-slot').remove();
+const $slot = $('<div id="engagecx-slot" style="padding:0;margin:0;"></div>').appendTo('#content');
+
+// create the iframe with the built URL
+const $iframe = $('<iframe>', {
+  id: 'engagecxFrame',
+  src: url,
+  allow: 'clipboard-write; microphone; camera',
   style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
 });
 
 $slot.append($iframe);
-
-});
