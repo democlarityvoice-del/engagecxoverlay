@@ -37,38 +37,33 @@ if (!document.getElementById('engagecx-style')) {
   `;
   document.head.appendChild(style);
 }
-// prevent double-binding if script re-runs
 $('#nav-engagecx-link')
-  .attr('href', '#') // don't let the portal router navigate
+  .attr('href', '#')
   .off('click')
-  .on('click', async function (e) {
+  .on('click', function (e) {
     e.preventDefault();
     e.stopPropagation();
-    e.stopImmediatePropagation(); // <- this is the key
+    e.stopImmediatePropagation();
 
-    // nav highlight
     $("#nav-buttons li").removeClass("nav-link-current");
     $("#nav-engagecx").addClass("nav-link-current");
     $('.navigation-title').text("EngageCX");
-
-    const company = encodeURIComponent('Demo Tenant');
-    const userId  = encodeURIComponent('05c850f8-3107-4acd-beb5-ba673389a3c4');
-    const src =
-      'https://engagecx.clarityvoice.com/#/agentConsole/message'
-      + '?includeWs=true&autoLogon=true'
-      + `&company=${company}&userId=${userId}`
-      + '&topLayout=false&navigationStyle=none&showAgentProfile=false';
 
     let slot = $('#engagecx-slot');
     if (!slot.length) slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
 
     $('#engagecxFrame').remove();
     const $iframe = $('<iframe>', {
-      id: 'engagecxFrame', src, width: '100%', height: 800,
-      allow: 'clipboard-write; microphone; camera', style: 'border:none'
+      id: 'engagecxFrame',
+      src: 'https://clarityvoice.com', // public site for sanity check
+      width: '100%',
+      height: 800,
+      style: 'border:none'
     });
 
     slot.empty().append($iframe);
+  });
+
 
     // optional: hide the blue loader after heartbeat
     $iframe.on('load', async () => {
