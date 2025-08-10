@@ -62,7 +62,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
 
   const $iframe = $('<iframe>', {
     id: 'engagecxFrame',
-    src: 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true',
+    src: 'https://engagecx.clarityvoice.com/#/login',
     style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
   });
 
