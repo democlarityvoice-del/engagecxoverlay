@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- trying the redirect here
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- trying redirect second time
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -39,7 +39,7 @@ if (!document.getElementById('engagecx-style')) {
 // neutralize the anchor
 $('#nav-engagecx a').attr('href', '#');
 
-// CLICK -> replace #content with our iframe (only change that matters)
+// CLICK -> replace #content with our iframe
 $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
   e.preventDefault();
@@ -49,43 +49,33 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   $("#nav-engagecx").addClass("nav-link-current");
   $('.navigation-title').text("EngageCX");
 
-  // >>> one surgical change: clear content before injecting <<<
-  const $content = $('#content');
-  $content.empty(); // <- this prevents the home screen from bleeding through
+  // clear content to prevent home screen bleed
+  $('#content').empty();
 
-// build a fresh slot + iframe
-let $slot = $('#engagecx-slot');
-if (!$slot.length) {
-  $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-} else {
-  $slot.empty();
-}
+  // pick the redirect target (Agent Panel)
+  const targetHash  = '#/agentConsole/message/index?includeWs=true';
+  const redirectHash = encodeURIComponent(targetHash);
+  const redirectPath = encodeURIComponent('/agentConsole/message/index?includeWs=true');
 
-// pick the redirect target (Agent Panel)
-const targetHash  = '#/agentConsole/message/index?includeWs=true';
-const redirectHash = encodeURIComponent(targetHash);                                // %23/agentConsole/...
-const redirectPath = encodeURIComponent('/agentConsole/message/index?includeWs=true'); // /agentConsole/...
+  // try A first; if it doesn't hop after login, try 1→2→3
+  const urls = [
+    `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,   // A
+    `https://engagecx.clarityvoice.com/#/login?redirect=${redirectPath}&t=${Date.now()}`,   // B
+    `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectHash}&t=${Date.now()}`, // C
+    `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectPath}&t=${Date.now()}`  // D
+  ];
 
-// try A first; if it doesn't hop after login, try 1→2→3
-const urls = [
-  `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`,   // A
-  `https://engagecx.clarityvoice.com/#/login?redirect=${redirectPath}&t=${Date.now()}`,   // B
-  `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectHash}&t=${Date.now()}`, // C
-  `https://engagecx.clarityvoice.com/#/login?redirectTo=${redirectPath}&t=${Date.now()}`  // D
-];
+  const url = urls[0]; // try A first
 
-const url = urls[0]; // try A first
+  // build a fresh slot + iframe
+  const $slot = $('<div id="engagecx-slot" style="padding:0;margin:0;"></div>').appendTo('#content');
 
-// rebuild the slot to avoid the "home clone" bleed
-$('#engagecx-slot').remove();
-const $slot = $('<div id="engagecx-slot" style="padding:0;margin:0;"></div>').appendTo('#content');
+  const $iframe = $('<iframe>', {
+    id: 'engagecxFrame',
+    src: url,
+    allow: 'clipboard-write; microphone; camera',
+    style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+  });
 
-// create the iframe with the built URL
-const $iframe = $('<iframe>', {
-  id: 'engagecxFrame',
-  src: url,
-  allow: 'clipboard-write; microphone; camera',
-  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+  $slot.append($iframe);
 });
-
-$slot.append($iframe);
