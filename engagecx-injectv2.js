@@ -39,33 +39,51 @@ if (!document.getElementById('engagecx-style')) {
 // neutralize the anchor
 $('#nav-engagecx a').attr('href', '#');
 
-// CLICK -> replace #content with our iframe (only change that matters)
-$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
-.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
-  e.preventDefault();
-  e.stopPropagation();
+// CLICK -> render EngageCX into the real content host
+$(document)
+  .off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+  .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
 
-  $("#nav-buttons li").removeClass("nav-link-current");
-  $("#nav-engagecx").addClass("nav-link-current");
-  $('.navigation-title').text("EngageCX");
+    $("#nav-buttons li").removeClass("nav-link-current");
+    $("#nav-engagecx").addClass("nav-link-current");
+    $('.navigation-title').text("EngageCX");
 
-  // >>> one surgical change: clear content before injecting <<<
-  const $content = $('#content');
-  $content.empty(); // <- this prevents the home screen from bleeding through
+    // find the real host (portal varies by page)
+    let $host = $('#content');
+    if (!$host.length) $host = $('#main-content');              // common alt
+    if (!$host.length) $host = $('.page-container, .wrapper').first(); // last resort
 
-// build a fresh slot + iframe
-let $slot = $('#engagecx-slot');
-if (!$slot.length) {
-  $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-} else {
-  $slot.empty();
-}
+    if (!$host.length) {
+      console.warn('[EngageCX] No content host found; aborting to avoid appending at <body> end.');
+      return; // don't create a fake #content at the bottom
+    }
 
-const $iframe = $('<iframe>', {
-  id: 'engagecxFrame',
-  src: 'https://engagecx.clarityvoice.com/#/login',
-  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
-});
+    // clear and build a fresh slot
+    $host.empty();
+    const $slot = $('<div id="engagecx-slot" style="padding:0;margin:0;display:block;"></div>');
+    $host.append($slot);
+
+    // size the iframe to the visible area
+    const iframeStyle = 'border:none;width:100%;height:calc(100vh - 200px);min-height:800px;display:block;';
+
+    // ==== choose where to go (redirect-to-Agent-Panel after login) ====
+    const targetHash   = '#/agentConsole/message/index?includeWs=true';
+    const redirectHash = encodeURIComponent(targetHash);
+    const url = `https://engagecx.clarityvoice.com/#/login?redirect=${redirectHash}&t=${Date.now()}`;
+
+    const $iframe = $('<iframe>', {
+      id: 'engagecxFrame',
+      src: url,
+      allow: 'clipboard-write; microphone; camera',
+      style: iframeStyle
+    });
+
+    $slot.append($iframe);
+    window.scrollTo(0, 0); // make sure user sees the panel
+  });
+
 
 $slot.append($iframe);
 
