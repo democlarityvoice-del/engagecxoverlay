@@ -63,7 +63,7 @@ if (!$slot.length) {
 
 const $iframe = $('<iframe>', {
   id: 'engagecxFrame',
-  src: 'https://engagecx.clarityvoice.com',
+  src: 'https://engagecx.clarityvoice.com/#/login',
   style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
 });
 
