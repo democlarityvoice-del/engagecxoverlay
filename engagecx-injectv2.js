@@ -65,29 +65,33 @@ const targetHash = '#/agentConsole/message/index?includeWs=true';
 const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
 const targetUrl  = 'https://engagecx.clarityvoice.com/' + targetHash;
 
+// --- Build a tiny toolbar + iframe pointed at login ---
+const targetHash = '#/agentConsole/message/index?includeWs=true';
+const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+const targetUrl  = 'https://engagecx.clarityvoice.com/' + targetHash;
+
+// toolbar
+const $bar = $(`
+  <div id="engagecx-toolbar" style="display:flex;align-items:center;gap:8px;
+       padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+    <span style="font-size:13px;color:#444">EngageCX loaded. After you log in, click:</span>
+    <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+      Go to Agents Panel
+    </button>
+  </div>
+`);
+
 const $iframe = $('<iframe>', {
   id: 'engagecxFrame',
   src: loginUrl,
   allow: 'clipboard-write; microphone; camera',
-  style: 'border:none; width:100%; height:calc(100vh - 200px); min-height:800px;'
+  style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px;' // 240 = iframe height minus toolbar
 });
 
-let loadCount = 0;
-let redirected = false;
+$slot.append($bar, $iframe);
 
-// First load = login page. After they log in, the app typically does a full reload → second onload.
-$iframe.on('load', function () {
-  loadCount += 1;
-  if (loadCount >= 2 && !redirected) {
-    redirected = true;
-    $('#engagecxFrame').attr('src', targetUrl);
-  }
+// click => swap to agents panel
+$(document).off('click.engagecx-go').on('click.engagecx-go', '#engagecx-go-agent', function (e) {
+  e.preventDefault();
+  $('#engagecxFrame').attr('src', targetUrl);
 });
-
-// Safety: if something weird happens and you never get a 2nd load in 3 minutes, do nothing.
-setTimeout(() => {
-  // no action; just prevents any future logic from firing accidentally
-  redirected = redirected || false;
-}, 180000);
-
-$slot.append($iframe);
