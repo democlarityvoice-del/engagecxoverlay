@@ -1,40 +1,34 @@
-// --- EngageCX: full working drop-in (button + panel + toolbar) --- i hate chatgpt so much
+// --- Clone a tile and make "EngageCX" --- FINAL VERSION FOR TESTING!!!
+let existingbutton = $('#nav-music'); // base to clone
+let newbutton = existingbutton.clone();
 
-// Insert the EngageCX nav button once DOM is ready.
-// If #nav-music isn't present, clone the first nav tile.
-$(function () {
-  if (!$('#nav-engagecx').length) {
-    let existingbutton = $('#nav-music');
-    if (!existingbutton.length) existingbutton = $('#nav-buttons li').first();
-    if (!existingbutton.length) { console.error('EngageCX: no nav tile to clone'); return; }
+newbutton.attr('id', 'nav-engagecx');
+newbutton.find('a').attr('id', 'nav-engagecx-link');
+newbutton.find('.nav-text').html("EngageCX");
 
-    let newbutton = existingbutton.clone();
+// place after Call History if present
+const after = $('#nav-callhistory');
+if (after.length) {
+  newbutton.insertAfter(after);
+} else {
+  newbutton.appendTo($('#nav-buttons'));
+}
 
-    newbutton.attr('id', 'nav-engagecx');
-    newbutton.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
-    newbutton.find('.nav-text').text('EngageCX');
-
-    // Icon mask
-    newbutton.find('.nav-bg-image').css({
-      '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-      'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-      '-webkit-mask-repeat': 'no-repeat',
-      'mask-repeat':         'no-repeat',
-      '-webkit-mask-position':'center 48%',
-      'mask-position':       'center 48%',
-      '-webkit-mask-size':   '71% 71%',
-      'mask-size':           '71% 71%',
-      'background-color':    'rgba(255,255,255,0.92)'
-    });
-
-    // place after Call History if present
-    const after = $('#nav-callhistory');
-    if (after.length) newbutton.insertAfter(after);
-    else newbutton.appendTo($('#nav-buttons'));
-  }
+// Icon mask
+newbutton.find('.nav-bg-image').css({
+  '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+  'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+  '-webkit-mask-repeat': 'no-repeat',
+  'mask-repeat':         'no-repeat',
+  '-webkit-mask-position':'center 48%',
+  'mask-position':       'center 48%',
+  '-webkit-mask-size':   '71% 71%',
+  'mask-size':           '71% 71%',
+  'background-color':    'rgba(255,255,255,0.92)'
 });
 
-// Build the view when the EngageCX tile is clicked
+$('#nav-engagecx a').attr('href', '#');
+
 $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
   e.preventDefault();
@@ -52,10 +46,8 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $slot.empty();
   }
 
-  // URLs
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  // Load the shell (no /index) and show layout so the right-side ticket/history rail appears
-  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
   const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
   // Toolbar
@@ -90,6 +82,19 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 
   $slot.append($bar, $iframe);
 
+  // Utility: Hide Agent Profile icon inside iframe
+  function hideProfileIcon() {
+    try {
+      const iframeDoc = document.getElementById('engagecxFrame').contentWindow.document;
+      const profileEl = iframeDoc.querySelector('.agent-profile, .profile-wrap, [class*="agentProfile"]');
+      if (profileEl) {
+        profileEl.style.display = 'none';
+      }
+    } catch (err) {
+      console.warn("Could not hide profile icon yet:", err);
+    }
+  }
+
   // Go to Agents Panel
   $(document).off('click.engagecx-go-agent')
   .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
@@ -104,7 +109,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → logout popup, then reload login in iframe (kept as-is)
+  // Refresh Session → logout popup, then reload login in iframe
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
@@ -131,15 +136,9 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     }, 1000);
   });
 
-  // Watch iframe loads to hide profile icon (best effort)
+  // Watch iframe loads to hide profile icon
   $('#engagecxFrame').on('load', function () {
-    setTimeout(function hideProfileIcon () {
-      try {
-        const doc = document.getElementById('engagecxFrame').contentWindow.document;
-        const el = doc.querySelector('.agent-profile, .profile-wrap, [class*="agentProfile"]');
-        if (el) el.style.display = 'none';
-      } catch {}
-    }, 800);
+    setTimeout(hideProfileIcon, 800); // wait a bit for DOM to be ready
   });
 
 });
