@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- hide dat profile, gimme menus
+// --- Clone a tile and make "EngageCX" --- hide dat profile, gimme menus-- THIS VERSION ABSOLUTELY WORKS!  just needs a couple of cleanups to remove profile
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
