@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- THIS IS ANOTHER REDIRECT ATTEMPT.
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- THIS IS A GOOD CLEAN RUN, FROM INCOGNITO.  ADDS BUTTON TO REDIRECT TO AGENTS PANEL.  NIIICE.
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
