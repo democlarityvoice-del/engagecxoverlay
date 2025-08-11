@@ -82,37 +82,47 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   });
 }); // ✅ Close EngageCX main click handler here
 
-// Refresh Session → force real cookie kill + reload login page
+// Refresh Session → Nuke cookies via popup, then reload login
 $(document).off('click.engagecx-refresh')
 .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
-    const loginUrl = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-    const logoutUrl = 'https://engagecx.clarityvoice.com/logout'; // not hash route
-
     $('#engagecx-go-agent').prop('disabled', true).text('Refreshing...');
 
-    // Open a small popup to the real domain so user agent clears cookies
+    // Step 1: Open EngageCX popup on same domain so we can clear cookies
     const popup = window.open(
-        logoutUrl,
-        'EngageCXLogout',
-        'width=400,height=300,noopener'
+        'https://engagecx.clarityvoice.com/#/login',
+        'EngageCXNuke',
+        'width=800,height=600,noopener'
     );
 
-    // Safety: force close popup after 2s in case logout is instant
-    const killTimer = setTimeout(() => {
-        try { popup.close(); } catch (err) {}
-        $('#engagecxFrame').attr('src', loginUrl);
-        $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
-    }, 2000);
-
-    // If popup is closed early by the user, reload immediately
-    const watcher = setInterval(() => {
-        if (popup.closed) {
-            clearTimeout(killTimer);
-            clearInterval(watcher);
-            $('#engagecxFrame').attr('src', loginUrl);
-            $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
+    // Step 2: Inject nuke script after popup loads
+    const injectNuke = setInterval(() => {
+        try {
+            if (popup && popup.document && popup.document.readyState === 'complete') {
+                popup.document.body.innerHTML = `<p style="font-family:sans-serif;padding:20px;">
+                    Clearing EngageCX session... please wait...
+                </p>`;
+                popup.eval(`
+                    document.cookie.split(';').forEach(function(c) {
+                        document.cookie = c.replace(/^ +/, '')
+                            .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+                    });
+                    location.href = '/#/login';
+                `);
+                clearInterval(injectNuke);
+            }
+        } catch (err) {
+            // Ignore cross-domain errors until it’s fully loaded
         }
     }, 300);
+
+    // Step 3: When popup closes, reload iframe with clean login
+    const watchClose = setInterval(() => {
+        if (!popup || popup.closed) {
+            clearInterval(watchClose);
+            $('#engagecxFrame').attr('src', 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now());
+            $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
+        }
+    }, 500);
 });
