@@ -46,11 +46,14 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $slot.empty();
   }
 
+  // ⬇️ these exist *inside* the handler so they can be used below
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
+  // ⬇️ THIS is the only change you said you'll make:
+  // const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
   const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
-  // Toolbar
+  // ----- Toolbar + iframe (this was accidentally outside the handler before) -----
   const $bar = $(`
     <div style="display:flex;flex-direction:column;gap:6px;
          padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
@@ -82,34 +85,20 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 
   $slot.append($bar, $iframe);
 
-  // Utility: Hide Agent Profile icon inside iframe
-  function hideProfileIcon() {
-    try {
-      const iframeDoc = document.getElementById('engagecxFrame').contentWindow.document;
-      const profileEl = iframeDoc.querySelector('.agent-profile, .profile-wrap, [class*="agentProfile"]');
-      if (profileEl) {
-        profileEl.style.display = 'none';
-      }
-    } catch (err) {
-      console.warn("Could not hide profile icon yet:", err);
-    }
-  }
-
-  // Go to Agents Panel
+  // Buttons
   $(document).off('click.engagecx-go-agent')
   .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
     e.preventDefault();
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
-  // Go to Control Panel
   $(document).off('click.engagecx-go-control')
   .on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
     e.preventDefault();
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → logout popup, then reload login in iframe
+  // Refresh (left as you had it)
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
@@ -136,9 +125,14 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     }, 1000);
   });
 
-  // Watch iframe loads to hide profile icon
+  // Hide profile (best effort)
   $('#engagecxFrame').on('load', function () {
-    setTimeout(hideProfileIcon, 800); // wait a bit for DOM to be ready
+    setTimeout(function hideProfileIcon () {
+      try {
+        const doc = document.getElementById('engagecxFrame').contentWindow.document;
+        const el = doc.querySelector('.agent-profile, .profile-wrap, [class*="agentProfile"]');
+        if (el) el.style.display = 'none';
+      } catch {}
+    }, 800);
   });
-
 });
