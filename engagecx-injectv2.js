@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" ---  step back to attempt a force log out
+// --- Clone a tile and make "EngageCX" ---  force log out NUKE EDITION
 // --- Clone a tile and make "EngageCX" (appearance unchanged) ---
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
