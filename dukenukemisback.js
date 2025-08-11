@@ -1,26 +1,19 @@
 // --- Clone a tile and make "EngageCX" --- SAFE INSERT with right-side menu URLs
 $(function () {
   const waitForNav = setInterval(function () {
-    let existingbutton = $('#nav-music'); // base to clone
-    if (existingbutton.length && !$('#nav-engagecx').length) {
+    const $base = $('#nav-music'); // base to clone
+    if ($base.length && !$('#nav-engagecx').length) {
       clearInterval(waitForNav);
 
-      let newbutton = existingbutton.clone();
+      const $new = $base.clone();
+      $new.attr('id', 'nav-engagecx');
+      $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
+      $new.find('.nav-text').text('EngageCX');
 
-      newbutton.attr('id', 'nav-engagecx');
-      newbutton.find('a').attr('id', 'nav-engagecx-link');
-      newbutton.find('.nav-text').html("EngageCX");
+      const $after = $('#nav-callhistory');
+      if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
 
-      // place after Call History if present
-      const after = $('#nav-callhistory');
-      if (after.length) {
-        newbutton.insertAfter(after);
-      } else {
-        newbutton.appendTo($('#nav-buttons'));
-      }
-
-      // Icon mask
-      newbutton.find('.nav-bg-image').css({
+      $new.find('.nav-bg-image').css({
         '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
         'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
         '-webkit-mask-repeat': 'no-repeat',
@@ -32,11 +25,9 @@ $(function () {
         'background-color':    'rgba(255,255,255,0.92)'
       });
 
-      $('#nav-engagecx a').attr('href', '#');
-
-      // ✅ Correct URLs — Agent Panel shows right-side ticket/history menu
+      // ✅ Correct URLs — load shell (no /index) + show layout so right rail renders
       window.engageLoginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-      window.engageTargetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Right&showAgentProfile=false';
+      window.engageTargetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
       window.engageControlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
     }
   }, 300);
