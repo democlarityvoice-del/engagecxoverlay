@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- RESTORE ORIGINAL VERSION
+// --- Clone a tile and make "EngageCX" --- RESTORE ORIGINAL VERSION- quick add for the right side menu
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -47,7 +47,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   }
 
 const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
+const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
 const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
 
