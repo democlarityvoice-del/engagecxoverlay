@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- THIS IS A GOOD CLEAN RUN, FROM INCOGNITO.  ADDS BUTTON TO REDIRECT TO AGENTS PANEL.  NIIICE.
+// --- Clone a tile and make "EngageCX" (appearance unchanged) ---
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -49,7 +49,6 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
   }
 
   // Toolbar + iframe
-  const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
   const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
 
   const $bar = $(`
@@ -70,9 +69,43 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
 
   $slot.append($bar, $iframe);
 
-  // Button → swap iframe src to agents panel
+  // Button → swap iframe src to agents panel with token injection
   $(document).off('click.engagecx-go').on('click.engagecx-go', '#engagecx-go-agent', function (e) {
     e.preventDefault();
+
+    const token = localStorage.getItem("ns_t"); // from portal
+    if (!token) {
+      alert("No active EngageCX session found. Please log in again.");
+      return;
+    }
+
+    const targetUrl = `https://engagecx.clarityvoice.com/?token=${encodeURIComponent(token)}#/agentConsole/message/index?includeWs=true`;
     $('#engagecxFrame').attr('src', targetUrl);
   });
 });
+
+// ==============================
+// Agent Panel token injector
+// ==============================
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromPortal = urlParams.get("token");
+
+  if (tokenFromPortal) {
+    const existingToken = localStorage.getItem("ns_t");
+
+    // Only update if missing or different
+    if (!existingToken || existingToken !== tokenFromPortal) {
+      localStorage.setItem("ns_t", tokenFromPortal);
+      console.log(
+        "Session token injected from portal:",
+        tokenFromPortal.substring(0, 20) + "..."
+      );
+    } else {
+      console.log("Existing token matches portal token. No overwrite needed.");
+    }
+
+    // 🔒 Remove token from the URL (no history entry)
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+  }
+})();
