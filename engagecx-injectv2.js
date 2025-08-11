@@ -42,6 +42,16 @@
     const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
     const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
+    // >>> NEW: resize nudge helper (inside start so handlers can call it)
+    function nudgeIframe() {
+      const $f = $('#engagecxFrame');
+      if (!$f.length) return;
+      const prev = $f[0].style.width || '100%';
+      $f.css('width', '99.6%');
+      requestAnimationFrame(() => { $f.css('width', prev); });
+    }
+    // <<< NEW
+
     // Click the EngageCX nav: build toolbar + iframe
     $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
@@ -77,7 +87,11 @@
         scrolling: 'yes'
       });
 
+      // >>> NEW: kick on load + first mount
+      $iframe.on('load', nudgeIframe);
       $slot.append($bar, $iframe);
+      nudgeIframe();
+      // <<< NEW
     });
 
     // Go to Agents Panel
@@ -85,6 +99,7 @@
     .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
       e.preventDefault();
       $('#engagecxFrame').attr('src', targetUrl);
+      nudgeIframe(); // NEW
     });
 
     // Go to Control Panel
@@ -92,6 +107,7 @@
     .on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
       e.preventDefault();
       $('#engagecxFrame').attr('src', controlUrl);
+      nudgeIframe(); // NEW
     });
 
     // Refresh Session — popup (best-effort) + immediate iframe login (buttons never disabled)
@@ -109,6 +125,7 @@
 
       const freshLogin = nextLoginUrl();
       $('#engagecxFrame').attr('src', freshLogin);
+      nudgeIframe(); // NEW
     });
   } // <--- END start()
 
@@ -122,4 +139,3 @@
     );
   })();
 })(); // <--- END IIFE
-
