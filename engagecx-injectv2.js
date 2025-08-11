@@ -1,4 +1,4 @@
-// ===== EngageCX bootstrap (waits for jQuery + nav) ===== attenpting a full refresh
+// ===== EngageCX bootstrap (waits for jQuery + nav) ===== this version should actually run everything. the duke is unamused
 // Removed hide profile, added ticket side panel
 ;(function () {
   function when(pred, fn) {
@@ -38,52 +38,96 @@
 
     $('#nav-engagecx a').attr('href', '#');
 
-    // Function to generate a fresh login URL each time
-function nextLoginUrl() {
-  return 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now() +
-         '&r=' + Math.random().toString(36).slice(2);
-}
+    // Keep these URLs in scope for the handlers below
+    const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
+    const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
-const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
-const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
+    // Build panel on click
+    $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+    .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-// Build panel on click
-$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
-.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
-  e.preventDefault();
-  e.stopPropagation();
+      $("#nav-buttons li").removeClass("nav-link-current");
+      $("#nav-engagecx").addClass("nav-link-current");
+      $('.navigation-title').text("EngageCX");
 
-  $("#nav-buttons li").removeClass("nav-link-current");
-  $("#nav-engagecx").addClass("nav-link-current");
-  $('.navigation-title').text("EngageCX");
+      const $content = $('#content').empty();
+      let $slot = $('#engagecx-slot');
+      if (!$slot.length) $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+      else $slot.empty();
 
-  const $content = $('#content').empty();
-  let $slot = $('#engagecx-slot');
-  if (!$slot.length) $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-  else $slot.empty();
+      const $bar = $(`
+        <div style="display:flex;flex-direction:column;gap:6px;
+             padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+          <div style="font-size:13px;color:#444;">
+            <strong>Step 1:</strong> Click "Refresh Session" to open a logout popup.<br>
+            <strong>Step 2:</strong> In the popup, click Log Out, then close the popup.<br>
+            <strong>Step 3:</strong> Use "Go to Agents Panel" or "Go to Control Panel" as needed.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
+            <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
+            <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Refresh Session</button>
+          </div>
+        </div>
+      `);
 
-  const $bar = $(`
-    <div style="display:flex;flex-direction:column;gap:6px;
-         padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
-      <div style="font-size:13px;color:#444;">
-        <strong>Step 1:</strong> Click "Refresh Session" to open a logout popup.<br>
-        <strong>Step 2:</strong> In the popup, click Log Out, then close the popup.<br>
-        <strong>Step 3:</strong> Use "Go to Agents Panel" or "Go to Control Panel" as needed.
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
-        <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
-        <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Refresh Session</button>
-      </div>
-    </div>
-  `);
+      const $iframe = $('<iframe>', {
+        id: 'engagecxFrame',
+        src: loginUrl,
+        style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
+        scrolling: 'yes'
+      });
 
-  const $iframe = $('<iframe>', {
-    id: 'engagecxFrame',
-    src: nextLoginUrl(), // only fresh on first load or refresh button
-    style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
-    scrolling: 'yes'
-  });
+      $slot.append($bar, $iframe);
+    });
 
-  $slot.append($bar, $iframe);
-});
+    // Go to Agents Panel
+    $(document).off('click.engagecx-go-agent')
+    .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
+      e.preventDefault();
+      $('#engagecxFrame').attr('src', targetUrl);
+    });
+
+    // Go to Control Panel
+    $(document).off('click.engagecx-go-control')
+    .on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
+      e.preventDefault();
+      $('#engagecxFrame').attr('src', controlUrl);
+    });
+
+    // Refresh Session → open logout in a popup, then immediately reload login in the iframe.
+    // We NEVER disable the buttons.
+    $(document).off('click.engagecx-refresh')
+    .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+      e.preventDefault();
+
+      const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
+
+      try {
+        window.open(
+          logoutUrl,
+          'EngageCXLogout',
+          'width=900,height=700,noopener,noreferrer'
+        );
+      } catch (_) {
+        // ignore
+      }
+
+      $('#engagecxFrame').attr('src', loginUrl);
+      setTimeout(() => document.getElementById('engagecxFrame')?.focus(), 50);
+    });
+  }
+
+  // Wait for jQuery, then nav, then start
+  (function waitForJQ(){
+    var jq = window.jQuery || window.$;
+    if (!jq || !jq.fn || !jq.fn.jquery) return void setTimeout(waitForJQ, 300);
+    when(
+      () => jq('#nav-buttons').length && (jq('#nav-music').length || jq('#nav-buttons').children('li').length),
+      start
+    );
+  })();
+})();
