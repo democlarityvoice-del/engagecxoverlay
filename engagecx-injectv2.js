@@ -1,5 +1,5 @@
 // ===== EngageCX bootstrap (waits for jQuery + nav) =====
-// Removed hide profile; ticket side panel via isTicket=true; Refresh = no popup
+// Removed hide profile; ticket side panel via isTicket=true; Refresh = popup + immediate iframe login
 ;(function () {
   function when(pred, fn) {
     if (pred()) return void fn();
@@ -94,25 +94,32 @@
       $('#engagecxFrame').attr('src', controlUrl);
     });
 
-// Refresh Session — open logout in a popup (best-effort) and immediately reload iframe to a fresh login
-$(document).off('click.engagecx-refresh')
-.on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
-  e.preventDefault();
+    // Refresh Session — popup (best-effort) + immediate iframe login (buttons never disabled)
+    $(document).off('click.engagecx-refresh')
+    .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+      e.preventDefault();
 
-  // fire-and-forget popup; user may or may not need to click "Log Out"
-  try {
-    window.open(
-      'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now(),
-      'EngageCXLogout',
-      'width=900,height=700,noopener,noreferrer'
+      try {
+        window.open(
+          'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now(),
+          'EngageCXLogout',
+          'width=900,height=700,noopener,noreferrer'
+        );
+      } catch {}
+
+      const freshLogin = nextLoginUrl();
+      $('#engagecxFrame').attr('src', freshLogin);
+    });
+  } // <--- END start()
+
+  // Bootstrap: wait for jQuery, then wait for nav, then run start()
+  (function waitForJQ() {
+    const jq = window.jQuery || window.$;
+    if (!jq || !jq.fn || !jq.fn.jquery) return void setTimeout(waitForJQ, 300);
+    when(
+      () => jq('#nav-buttons').length && (jq('#nav-music').length || jq('#nav-buttons').children('li').length),
+      start
     );
-  } catch {}
-
-  // always show a truly fresh login page in the iframe right away
-  const freshLogin = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now()
-                   + '&r=' + Math.random().toString(36).slice(2);
-  $('#engagecxFrame').attr('src', freshLogin);
-});
-
-});
+  })();
+})(); // <--- END IIFE
 
