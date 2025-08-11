@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- DUKE NUKEM with instructions
+// --- Clone a tile and make "EngageCX" --- DUKE NUKEM
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -52,17 +52,23 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
   const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
 
-  // Toolbar with two buttons
+  // Toolbar with step-by-step instructions
   const $bar = $(`
-    <div style="display:flex;align-items:center;gap:8px;
+    <div style="display:flex;flex-direction:column;gap:6px;
          padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
-      <span style="font-size:13px;color:#444">After logging in, click:</span>
-      <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
-        Go to Agents Panel
-      </button>
-      <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
-        Refresh Session
-      </button>
+      <div style="font-size:13px;color:#444;">
+        <strong>Step 1:</strong> Click "Refresh Session" to open EngageCX in a popup.<br>
+        <strong>Step 2:</strong> In the popup, log out (if already logged in) or log in.<br>
+        <strong>Step 3:</strong> Close the popup, then click "Go to Agents Panel" below.
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+          Go to Agents Panel
+        </button>
+        <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+          Refresh Session
+        </button>
+      </div>
     </div>
   `);
 
@@ -80,27 +86,25 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
-  // Refresh Session → open popup for manual logout
-  $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+  // Refresh Session → open popup for manual login/logout
+  $(document).off('click.engagecx-refresh')
+  .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
-    const popupWidth = 1024;
-    const popupHeight = 768;
-    const left = (window.screen.width / 2) - (popupWidth / 2);
-    const top = (window.screen.height / 2) - (popupHeight / 2);
+    const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Login...');
 
     const popup = window.open(
-      'https://engagecx.clarityvoice.com/#/agentConsole',
-      'EngageCXLogout',
-      `width=${popupWidth},height=${popupHeight},top=${top},left=${left},noopener,noreferrer`
+      loginUrlExplicit,
+      'EngageCXLogin',
+      'width=1024,height=768,noopener,noreferrer'
     );
-
-    alert("In the popup, click your profile → Logout. Then close the popup to reload.");
 
     const popupTimer = setInterval(() => {
       if (popup.closed) {
         clearInterval(popupTimer);
         $('#engagecxFrame').attr('src', loginUrl);
+        $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
       }
     }, 1000);
   });
