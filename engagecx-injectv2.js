@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" ---  additional logic to switch button to agents panel once detected. 
+// --- Clone a tile and make "EngageCX" ---  step back to attempt a force log out
 // --- Clone a tile and make "EngageCX" (appearance unchanged) ---
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
@@ -81,30 +81,23 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
-  // Refresh Session → isolated popup login, then auto-load panel OR detect existing login
-  $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+  // Refresh Session → force logout then reload login
+$(document).off('click.engagecx-refresh')
+.on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
-    const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
+    const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
 
-    $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Login...');
+    // Disable Go to Agents Panel while refreshing
+    $('#engagecx-go-agent').prop('disabled', true).text('Refreshing...');
 
-    const popup = window.open(
-      loginUrlExplicit,
-      'EngageCXLogin',
-      'width=1024,height=768,noopener,noreferrer'
-    );
+    // Step 1: Load logout page in iframe
+    $('#engagecxFrame').attr('src', logoutUrl);
 
-    const targetCheck = setInterval(() => {
-      const iframeSrc = $('#engagecxFrame').attr('src') || '';
-      if (
-        (popup && popup.closed) || 
-        iframeSrc.includes('/agentConsole/')
-      ) {
-        clearInterval(targetCheck);
-        $('#engagecxFrame').attr('src', targetUrl);
+    // Step 2: After 1 second, load the login page fresh
+    setTimeout(() => {
+        $('#engagecxFrame').attr('src', loginUrl);
         $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
-      }
     }, 1000);
-  });
 });
