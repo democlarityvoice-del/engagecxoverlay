@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- duke nukem HATES COOKIES
+// --- Clone a tile and make "EngageCX" --- duke nukem HATES COOKIES and loves reports
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -49,21 +49,25 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $slot.empty();
   }
 
-  const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
+  const loginUrl       = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+  const targetAgents   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
+  const targetControl  = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard';
 
-  // Toolbar with updated instructions
+  // Toolbar with updated instructions + both buttons
   const $bar = $(`
     <div style="display:flex;flex-direction:column;gap:6px;
          padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
       <div style="font-size:13px;color:#444;">
         <strong>Step 1:</strong> Click "Refresh Session" to open a logout popup.<br>
         <strong>Step 2:</strong> In the popup, click Log Out, then close the popup.<br>
-        <strong>Step 3:</strong> Click "Go to Agents Panel" to sign in and load your panel.
+        <strong>Step 3:</strong> Use the buttons below to go to Agents Panel or Control Panel.
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
           Go to Agents Panel
+        </button>
+        <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+          Go to Control Panel
         </button>
         <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
           Refresh Session
@@ -83,18 +87,24 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   // Go to Agents Panel
   $(document).off('click.engagecx-go').on('click.engagecx-go', '#engagecx-go-agent', function (e) {
     e.preventDefault();
-    $('#engagecxFrame').attr('src', targetUrl);
+    $('#engagecxFrame').attr('src', targetAgents);
   });
 
-  // Refresh Session → open popup to log out, then reload login in iframe
+  // Go to Control Panel
+  $(document).off('click.engagecx-go-control').on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
+    e.preventDefault();
+    $('#engagecxFrame').attr('src', targetControl);
+  });
+
+  // Refresh Session → open popup to log out, then allow re-login
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
     const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
-    const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const freshLoginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
 
-    $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Logout...');
+    $('#engagecx-go-agent, #engagecx-go-control').prop('disabled', true);
 
     const popup = window.open(
       logoutUrl,
@@ -105,9 +115,10 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     const popupTimer = setInterval(() => {
       if (popup.closed) {
         clearInterval(popupTimer);
-        $('#engagecxFrame').attr('src', loginUrl);
-        $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
+        // Always re-enable buttons so they can choose either panel
+        $('#engagecxFrame').attr('src', freshLoginUrl);
+        $('#engagecx-go-agent, #engagecx-go-control').prop('disabled', false);
       }
-    }, 1000);
+    }, 500);
   });
 });
