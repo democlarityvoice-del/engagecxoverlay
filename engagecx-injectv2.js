@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) ---
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- TEST TO ATTEMPT A REFRESH CACHE/FRESH TEST COOKIE
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -29,7 +29,7 @@ newbutton.find('.nav-bg-image').css({
 
 $('#nav-engagecx a').attr('href', '#');
 
-// CLICK → load login page in iframe + toolbar button to go to Agents Panel
+// CLICK → load login page in iframe + toolbar buttons
 $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
   e.preventDefault();
   e.stopPropagation();
@@ -48,15 +48,19 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $slot.empty();
   }
 
-  // Toolbar + iframe
   const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+  const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
 
+  // Toolbar with two buttons
   const $bar = $(`
     <div style="display:flex;align-items:center;gap:8px;
          padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
       <span style="font-size:13px;color:#444">After logging in, click:</span>
       <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
         Go to Agents Panel
+      </button>
+      <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+        Refresh Session
       </button>
     </div>
   `);
@@ -69,43 +73,16 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
 
   $slot.append($bar, $iframe);
 
-  // Button → swap iframe src to agents panel with token injection
+  // Go to Agents Panel
   $(document).off('click.engagecx-go').on('click.engagecx-go', '#engagecx-go-agent', function (e) {
     e.preventDefault();
-
-    const token = localStorage.getItem("ns_t"); // from portal
-    if (!token) {
-      alert("No active EngageCX session found. Please log in again.");
-      return;
-    }
-
-    const targetUrl = `https://engagecx.clarityvoice.com/?token=${encodeURIComponent(token)}#/agentConsole/message/index?includeWs=true`;
     $('#engagecxFrame').attr('src', targetUrl);
+  });
+
+  // Refresh Session (reload login page)
+  $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+    e.preventDefault();
+    $('#engagecxFrame').attr('src', loginUrl);
   });
 });
 
-// ==============================
-// Agent Panel token injector
-// ==============================
-(function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tokenFromPortal = urlParams.get("token");
-
-  if (tokenFromPortal) {
-    const existingToken = localStorage.getItem("ns_t");
-
-    // Only update if missing or different
-    if (!existingToken || existingToken !== tokenFromPortal) {
-      localStorage.setItem("ns_t", tokenFromPortal);
-      console.log(
-        "Session token injected from portal:",
-        tokenFromPortal.substring(0, 20) + "..."
-      );
-    } else {
-      console.log("Existing token matches portal token. No overwrite needed.");
-    }
-
-    // 🔒 Remove token from the URL (no history entry)
-    window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
-  }
-})();
