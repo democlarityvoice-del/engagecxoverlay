@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- DUKE NUKEM
+// --- Clone a tile and make "EngageCX" --- duke nukem HATES COOKIES
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -52,14 +52,14 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
   const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
 
-  // Toolbar with step-by-step instructions
+  // Toolbar with updated instructions
   const $bar = $(`
     <div style="display:flex;flex-direction:column;gap:6px;
          padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
       <div style="font-size:13px;color:#444;">
-        <strong>Step 1:</strong> Click "Refresh Session" to open EngageCX in a popup.<br>
-        <strong>Step 2:</strong> In the popup, log out (if already logged in) or log in.<br>
-        <strong>Step 3:</strong> Close the popup, then click "Go to Agents Panel" below.
+        <strong>Step 1:</strong> Click "Refresh Session" to open a logout popup.<br>
+        <strong>Step 2:</strong> In the popup, click Log Out, then close the popup.<br>
+        <strong>Step 3:</strong> Click "Go to Agents Panel" to sign in and load your panel.
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
@@ -86,17 +86,19 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
-  // Refresh Session → open popup for manual login/logout
+  // Refresh Session → open popup to log out, then reload login in iframe
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
-    const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-    $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Login...');
+    const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
+    const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+
+    $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Logout...');
 
     const popup = window.open(
-      loginUrlExplicit,
-      'EngageCXLogin',
+      logoutUrl,
+      'EngageCXLogout',
       'width=1024,height=768,noopener,noreferrer'
     );
 
