@@ -1,4 +1,5 @@
-// --- Clone a tile and make "EngageCX" ---  attempt to detect log in state and force a login screen 
+// --- Clone a tile and make "EngageCX" ---  additional logic to switch button to agents panel once detected. 
+// --- Clone a tile and make "EngageCX" (appearance unchanged) ---
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -29,8 +30,9 @@ newbutton.find('.nav-bg-image').css({
 
 $('#nav-engagecx a').attr('href', '#');
 
-// CLICK → load login page in iframe + toolbar
-$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+// CLICK → load login page in iframe + toolbar buttons
+$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
   e.preventDefault();
   e.stopPropagation();
 
@@ -51,11 +53,11 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
   const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
   const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
 
-  // Toolbar
+  // Toolbar with two buttons
   const $bar = $(`
-    <div style="display:flex;align-items:center;gap:12px;
-         padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;flex-wrap:wrap;">
-      <span style="font-size:13px;color:#444">After logging in, close the login window, then click:</span>
+    <div style="display:flex;align-items:center;gap:8px;
+         padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+      <span style="font-size:13px;color:#444">After logging in, click:</span>
       <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
         Go to Agents Panel
       </button>
@@ -79,30 +81,27 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
-  // Refresh Session → force popup login
+  // Refresh Session → isolated popup login, then auto-load panel OR detect existing login
   $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
     const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-    const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
 
     $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Login...');
-
-    // Center popup
-    const width = 1024;
-    const height = 768;
-    const left = (window.screen.width - width) / 2;
-    const top = (window.screen.height - height) / 2;
 
     const popup = window.open(
       loginUrlExplicit,
       'EngageCXLogin',
-      `width=${width},height=${height},top=${top},left=${left},noopener,noreferrer`
+      'width=1024,height=768,noopener,noreferrer'
     );
 
-    const popupTimer = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(popupTimer);
+    const targetCheck = setInterval(() => {
+      const iframeSrc = $('#engagecxFrame').attr('src') || '';
+      if (
+        (popup && popup.closed) || 
+        iframeSrc.includes('/agentConsole/')
+      ) {
+        clearInterval(targetCheck);
         $('#engagecxFrame').attr('src', targetUrl);
         $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
       }
