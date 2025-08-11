@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- physically hide the profile icon
+// --- Clone a tile and make "EngageCX" --- FINAL VERSION FOR TESTING!!!
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
