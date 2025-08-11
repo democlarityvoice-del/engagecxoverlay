@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- duke nukem HATES COOKIES and loves reports
+// --- Clone a tile and make "EngageCX" --- Toolbar Always Visible- ahhh nukeeee itttttt
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -29,7 +29,7 @@ newbutton.find('.nav-bg-image').css({
 
 $('#nav-engagecx a').attr('href', '#');
 
-// CLICK → load login page in iframe + toolbar buttons
+// CLICK → load EngageCX with persistent toolbar
 $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
   e.preventDefault();
@@ -49,20 +49,20 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $slot.empty();
   }
 
-  const loginUrl       = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const targetAgents   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
-  const targetControl  = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard';
+  const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
+  const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard';
 
-  // Toolbar with updated instructions + both buttons
+  // Persistent toolbar with instructions
   const $bar = $(`
     <div style="display:flex;flex-direction:column;gap:6px;
          padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
       <div style="font-size:13px;color:#444;">
         <strong>Step 1:</strong> Click "Refresh Session" to open a logout popup.<br>
         <strong>Step 2:</strong> In the popup, click Log Out, then close the popup.<br>
-        <strong>Step 3:</strong> Use the buttons below to go to Agents Panel or Control Panel.
+        <strong>Step 3:</strong> Use the buttons below to navigate without logging in again.
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
           Go to Agents Panel
         </button>
@@ -84,25 +84,23 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 
   $slot.append($bar, $iframe);
 
-  // Go to Agents Panel
+  // Navigation buttons
   $(document).off('click.engagecx-go').on('click.engagecx-go', '#engagecx-go-agent', function (e) {
     e.preventDefault();
-    $('#engagecxFrame').attr('src', targetAgents);
+    $('#engagecxFrame').attr('src', targetUrl);
   });
 
-  // Go to Control Panel
-  $(document).off('click.engagecx-go-control').on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
+  $(document).off('click.engagecx-control').on('click.engagecx-control', '#engagecx-go-control', function (e) {
     e.preventDefault();
-    $('#engagecxFrame').attr('src', targetControl);
+    $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → open popup to log out, then allow re-login
-  $(document).off('click.engagecx-refresh')
-  .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+  // Refresh Session → open popup for manual logout
+  $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
     const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
-    const freshLoginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const loginFresh = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
 
     $('#engagecx-go-agent, #engagecx-go-control').prop('disabled', true);
 
@@ -115,10 +113,9 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     const popupTimer = setInterval(() => {
       if (popup.closed) {
         clearInterval(popupTimer);
-        // Always re-enable buttons so they can choose either panel
-        $('#engagecxFrame').attr('src', freshLoginUrl);
+        $('#engagecxFrame').attr('src', loginFresh);
         $('#engagecx-go-agent, #engagecx-go-control').prop('disabled', false);
       }
-    }, 500);
+    }, 1000);
   });
 });
