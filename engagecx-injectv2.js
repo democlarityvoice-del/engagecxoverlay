@@ -48,10 +48,9 @@
     const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
     // Build panel on click
-    $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
-    .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
+$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+.on('click.engagecx', '#nav-engagecx,
+
 
       $("#nav-buttons li").removeClass("nav-link-current");
       $("#nav-engagecx").addClass("nav-link-current");
