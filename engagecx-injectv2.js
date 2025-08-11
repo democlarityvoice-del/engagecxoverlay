@@ -1,5 +1,4 @@
-// --- Clone a tile and make "EngageCX" ---  force log out NUKE EDITION, die die
-// --- Clone a tile and make "EngageCX" (appearance unchanged) ---
+// --- Clone a tile and make "EngageCX" --- DUKE NUKEM with instructions
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -80,43 +79,29 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     e.preventDefault();
     $('#engagecxFrame').attr('src', targetUrl);
   });
-}); // ✅ Close EngageCX main click handler here
 
-// Refresh Session → Popup with instructions to log out, then reload iframe
-$(document).off('click.engagecx-refresh')
-.on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+  // Refresh Session → open popup for manual logout
+  $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
-    $('#engagecx-go-agent').prop('disabled', true).text('Refreshing...');
+    const popupWidth = 1024;
+    const popupHeight = 768;
+    const left = (window.screen.width / 2) - (popupWidth / 2);
+    const top = (window.screen.height / 2) - (popupHeight / 2);
 
-    // Step 1: Open EngageCX popup
     const popup = window.open(
-        'https://engagecx.clarityvoice.com/#/login',
-        'EngageCXNuke',
-        'width=800,height=600,noopener'
+      'https://engagecx.clarityvoice.com/#/agentConsole',
+      'EngageCXLogout',
+      `width=${popupWidth},height=${popupHeight},top=${top},left=${left},noopener,noreferrer`
     );
 
-    // Step 2: Inject instructions once popup is ready
-    const injectInstructions = setInterval(() => {
-        try {
-            if (popup && popup.document && popup.document.readyState === 'complete') {
-                const banner = popup.document.createElement('div');
-                banner.style.cssText = 'background:#ffefc4;color:#333;padding:10px;font-family:sans-serif;font-size:14px;text-align:center;border-bottom:1px solid #ccc;';
-                banner.textContent = 'Please click "Log Out" in the top-right, then close this window.';
-                popup.document.body.prepend(banner);
-                clearInterval(injectInstructions);
-            }
-        } catch (err) {
-            // Wait for same-domain access
-        }
-    }, 300);
+    alert("In the popup, click your profile → Logout. Then close the popup to reload.");
 
-    // Step 3: Watch for popup close
-    const watchClose = setInterval(() => {
-        if (!popup || popup.closed) {
-            clearInterval(watchClose);
-            $('#engagecxFrame').attr('src', 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now());
-            $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
-        }
-    }, 500);
+    const popupTimer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(popupTimer);
+        $('#engagecxFrame').attr('src', loginUrl);
+      }
+    }, 1000);
+  });
 });
