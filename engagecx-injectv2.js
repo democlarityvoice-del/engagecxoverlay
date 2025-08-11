@@ -1,4 +1,4 @@
-// ===== EngageCX bootstrap (waits for jQuery + nav) ===== removed hide profile
+// ===== EngageCX bootstrap (waits for jQuery + nav) ===== removed hide profile-- added ticket side
 ;(function () {
   function when(pred, fn) {
     if (pred()) return void fn();
