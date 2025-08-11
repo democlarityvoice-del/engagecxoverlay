@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- duke nukem hates cookie drama
+// --- Clone a tile and make "EngageCX" --- hide dat profile, gimme menus
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -47,7 +47,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   }
 
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
+  const agentUrl   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
   const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard';
 
   // Toolbar
@@ -86,7 +86,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   $(document).off('click.engagecx-go-agent')
   .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
     e.preventDefault();
-    $('#engagecxFrame').attr('src', targetUrl);
+    $('#engagecxFrame').attr('src', agentUrl);
   });
 
   // Go to Control Panel
@@ -96,18 +96,30 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → logout popup, then reload login in iframe
+  // Refresh Session
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
     const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
 
-    // Open popup — no button disabling this time
-    window.open(
+    $('#engagecx-go-agent, #engagecx-go-control')
+      .prop('disabled', false) // never disable so user keeps buttons
+      .text(function(index, text) {
+        return text.replace('Waiting for Logout...', 'Go to ' + (index === 0 ? 'Agents Panel' : 'Control Panel'));
+      });
+
+    const popup = window.open(
       logoutUrl,
       'EngageCXLogout',
       'width=1024,height=768,noopener,noreferrer'
     );
+
+    const popupTimer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(popupTimer);
+        $('#engagecxFrame').attr('src', loginUrl);
+      }
+    }, 1000);
   });
 });
