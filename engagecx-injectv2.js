@@ -36,7 +36,7 @@
 
     // Keep these URLs in scope for the handlers below
     const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();   // FIX: add timestamp
-    const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left';
+    const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
     const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
     // Build panel on click
