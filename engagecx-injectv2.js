@@ -82,42 +82,36 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   });
 }); // ✅ Close EngageCX main click handler here
 
-// Refresh Session → Nuke cookies via popup, then reload login
+// Refresh Session → Popup with instructions to log out, then reload iframe
 $(document).off('click.engagecx-refresh')
 .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
     $('#engagecx-go-agent').prop('disabled', true).text('Refreshing...');
 
-    // Step 1: Open EngageCX popup on same domain so we can clear cookies
+    // Step 1: Open EngageCX popup
     const popup = window.open(
         'https://engagecx.clarityvoice.com/#/login',
         'EngageCXNuke',
         'width=800,height=600,noopener'
     );
 
-    // Step 2: Inject nuke script after popup loads
-    const injectNuke = setInterval(() => {
+    // Step 2: Inject instructions once popup is ready
+    const injectInstructions = setInterval(() => {
         try {
             if (popup && popup.document && popup.document.readyState === 'complete') {
-                popup.document.body.innerHTML = `<p style="font-family:sans-serif;padding:20px;">
-                    Clearing EngageCX session... please wait...
-                </p>`;
-                popup.eval(`
-                    document.cookie.split(';').forEach(function(c) {
-                        document.cookie = c.replace(/^ +/, '')
-                            .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
-                    });
-                    location.href = '/#/login';
-                `);
-                clearInterval(injectNuke);
+                const banner = popup.document.createElement('div');
+                banner.style.cssText = 'background:#ffefc4;color:#333;padding:10px;font-family:sans-serif;font-size:14px;text-align:center;border-bottom:1px solid #ccc;';
+                banner.textContent = 'Please click "Log Out" in the top-right, then close this window.';
+                popup.document.body.prepend(banner);
+                clearInterval(injectInstructions);
             }
         } catch (err) {
-            // Ignore cross-domain errors until it’s fully loaded
+            // Wait for same-domain access
         }
     }, 300);
 
-    // Step 3: When popup closes, reload iframe with clean login
+    // Step 3: Watch for popup close
     const watchClose = setInterval(() => {
         if (!popup || popup.closed) {
             clearInterval(watchClose);
