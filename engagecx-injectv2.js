@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" ---
+// --- Clone a tile and make "EngageCX" --- physically hide the profile icon
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -47,8 +47,8 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   }
 
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const agentUrl   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
-  const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false&showAgentProfile=false';
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
+  const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
   // Toolbar
   const $bar = $(`
@@ -80,30 +80,26 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     scrolling: 'yes'
   });
 
-  // Hide Agent Profile icon in iframe after load (CSS fallback)
-  $iframe.on('load', function() {
-    try {
-      const iframeDoc = $iframe[0].contentDocument || $iframe[0].contentWindow.document;
-      const style = iframeDoc.createElement('style');
-      style.innerHTML = `
-        .agent-profile,
-        .agent-profile-container {
-          display: none !important;
-        }
-      `;
-      iframeDoc.head.appendChild(style);
-    } catch (err) {
-      console.warn('Could not inject style into iframe:', err);
-    }
-  });
-
   $slot.append($bar, $iframe);
+
+  // Utility: Hide Agent Profile icon inside iframe
+  function hideProfileIcon() {
+    try {
+      const iframeDoc = document.getElementById('engagecxFrame').contentWindow.document;
+      const profileEl = iframeDoc.querySelector('.agent-profile, .profile-wrap, [class*="agentProfile"]');
+      if (profileEl) {
+        profileEl.style.display = 'none';
+      }
+    } catch (err) {
+      console.warn("Could not hide profile icon yet:", err);
+    }
+  }
 
   // Go to Agents Panel
   $(document).off('click.engagecx-go-agent')
   .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
     e.preventDefault();
-    $('#engagecxFrame').attr('src', agentUrl);
+    $('#engagecxFrame').attr('src', targetUrl);
   });
 
   // Go to Control Panel
@@ -139,4 +135,10 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
       }
     }, 1000);
   });
+
+  // Watch iframe loads to hide profile icon
+  $('#engagecxFrame').on('load', function () {
+    setTimeout(hideProfileIcon, 800); // wait a bit for DOM to be ready
+  });
+
 });
