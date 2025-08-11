@@ -61,7 +61,7 @@
       }
 
       const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=';
-      const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
+      const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left';
       const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
       // Toolbar
@@ -96,18 +96,7 @@
 
       $slot.append($bar, $iframe);
 
-      // Utility: Hide Agent Profile icon inside iframe
-      function hideProfileIcon() {
-        try {
-          const iframeDoc = document.getElementById('engagecxFrame').contentWindow.document;
-          const profileEl = iframeDoc.querySelector('.agent-profile, .profile-wrap, [class*="agentProfile"]');
-          if (profileEl) {
-            profileEl.style.display = 'none';
-          }
-        } catch (err) {
-          console.warn("Could not hide profile icon yet:", err);
-        }
-      }
+     });
 
       // Go to Agents Panel
       $(document).off('click.engagecx-go-agent')
@@ -150,12 +139,6 @@
         }, 1000);
       });
 
-      // Watch iframe loads to hide profile icon
-      $('#engagecxFrame').on('load', function () {
-        setTimeout(hideProfileIcon, 800); // wait a bit for DOM to be ready
-      });
-
-    });
     // --- END original code ---
 
   }
