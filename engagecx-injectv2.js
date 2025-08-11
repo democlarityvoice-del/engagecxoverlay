@@ -80,8 +80,9 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     e.preventDefault();
     $('#engagecxFrame').attr('src', targetUrl);
   });
+}); // ✅ Close EngageCX main click handler here
 
-  // Refresh Session → force logout then reload login
+// Refresh Session → force logout then reload login
 $(document).off('click.engagecx-refresh')
 .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
@@ -89,13 +90,10 @@ $(document).off('click.engagecx-refresh')
     const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
     const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
 
-    // Disable Go to Agents Panel while refreshing
     $('#engagecx-go-agent').prop('disabled', true).text('Refreshing...');
 
-    // Step 1: Load logout page in iframe
     $('#engagecxFrame').attr('src', logoutUrl);
 
-    // Step 2: After 1 second, load the login page fresh
     setTimeout(() => {
         $('#engagecxFrame').attr('src', loginUrl);
         $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
