@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" ---dammit, duke
+// --- Clone a tile and make "EngageCX" --- duke nukem hates cookie drama
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -96,25 +96,18 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
- // Refresh Session → logout popup, then reload login in iframe
-$(document).off('click.engagecx-refresh')
-.on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
-  e.preventDefault();
+  // Refresh Session → logout popup, then reload login in iframe
+  $(document).off('click.engagecx-refresh')
+  .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+    e.preventDefault();
 
-  const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
-  const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
 
-  // Open logout popup but leave buttons enabled
-  const popup = window.open(
-    logoutUrl,
-    'EngageCXLogout',
-    'width=1024,height=768,noopener,noreferrer'
-  );
-
-  const popupTimer = setInterval(() => {
-    if (popup.closed) {
-      clearInterval(popupTimer);
-      $('#engagecxFrame').attr('src', loginUrl);
-    }
-  }, 1000);
+    // Open popup — no button disabling this time
+    window.open(
+      logoutUrl,
+      'EngageCXLogout',
+      'width=1024,height=768,noopener,noreferrer'
+    );
+  });
 });
