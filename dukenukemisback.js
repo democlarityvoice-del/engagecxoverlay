@@ -1,55 +1,46 @@
-// --- Clone a tile and make "EngageCX" --- RESTORE ORIGINAL VERSION- quick add for the right side menu
-let existingbutton = $('#nav-music'); // base to clone
-let newbutton = existingbutton.clone();
+// --- Clone a tile and make "EngageCX" --- SAFE INSERT with right-side menu URLs
+$(function () {
+  const waitForNav = setInterval(function () {
+    let existingbutton = $('#nav-music'); // base to clone
+    if (existingbutton.length && !$('#nav-engagecx').length) {
+      clearInterval(waitForNav);
 
-newbutton.attr('id', 'nav-engagecx');
-newbutton.find('a').attr('id', 'nav-engagecx-link');
-newbutton.find('.nav-text').html("EngageCX");
+      let newbutton = existingbutton.clone();
 
-// place after Call History if present
-const after = $('#nav-callhistory');
-if (after.length) {
-  newbutton.insertAfter(after);
-} else {
-  newbutton.appendTo($('#nav-buttons'));
-}
+      newbutton.attr('id', 'nav-engagecx');
+      newbutton.find('a').attr('id', 'nav-engagecx-link');
+      newbutton.find('.nav-text').html("EngageCX");
 
-// Icon mask
-newbutton.find('.nav-bg-image').css({
-  '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-  'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-  '-webkit-mask-repeat': 'no-repeat',
-  'mask-repeat':         'no-repeat',
-  '-webkit-mask-position':'center 48%',
-  'mask-position':       'center 48%',
-  '-webkit-mask-size':   '71% 71%',
-  'mask-size':           '71% 71%',
-  'background-color':    'rgba(255,255,255,0.92)'
+      // place after Call History if present
+      const after = $('#nav-callhistory');
+      if (after.length) {
+        newbutton.insertAfter(after);
+      } else {
+        newbutton.appendTo($('#nav-buttons'));
+      }
+
+      // Icon mask
+      newbutton.find('.nav-bg-image').css({
+        '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+        'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+        '-webkit-mask-repeat': 'no-repeat',
+        'mask-repeat':         'no-repeat',
+        '-webkit-mask-position':'center 48%',
+        'mask-position':       'center 48%',
+        '-webkit-mask-size':   '71% 71%',
+        'mask-size':           '71% 71%',
+        'background-color':    'rgba(255,255,255,0.92)'
+      });
+
+      $('#nav-engagecx a').attr('href', '#');
+
+      // ✅ Correct URLs — Agent Panel shows right-side ticket/history menu
+      window.engageLoginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+      window.engageTargetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Right&showAgentProfile=false';
+      window.engageControlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
+    }
+  }, 300);
 });
-
-$('#nav-engagecx a').attr('href', '#');
-
-$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
-.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  $("#nav-buttons li").removeClass("nav-link-current");
-  $("#nav-engagecx").addClass("nav-link-current");
-  $('.navigation-title').text("EngageCX");
-
-  const $content = $('#content').empty();
-  let $slot = $('#engagecx-slot');
-  if (!$slot.length) {
-    $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-  } else {
-    $slot.empty();
-  }
-
-const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
-const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
-
 
 
   // Toolbar
