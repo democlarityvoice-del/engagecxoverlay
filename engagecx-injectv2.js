@@ -46,8 +46,11 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $slot.empty();
   }
 
+  // Force desktop layout so the right rail appears
+  $slot.css({ minWidth: '1280px' });
+
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const targetUrl  = 'const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
   const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
   // Toolbar
@@ -109,7 +112,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → logout popup, then reload login in iframe
+  // Refresh Session → logout popup, then reload login in iframe (buttons currently disable/enable)
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
