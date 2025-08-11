@@ -79,28 +79,129 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
+// CLICK → load login page in iframe + toolbar buttons
+$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    $("#nav-buttons li").removeClass("nav-link-current");
+    $("#nav-engagecx").addClass("nav-link-current");
+    $('.navigation-title').text("EngageCX");
+
+    const $content = $('#content');
+    $content.empty();
+
+    let $slot = $('#engagecx-slot');
+    if (!$slot.length) {
+        $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+    } else {
+        $slot.empty();
+    }
+
+    const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
+
+    // Toolbar with two buttons
+    const $bar = $(`
+      <div style="display:flex;align-items:center;gap:8px;
+           padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+        <span style="font-size:13px;color:#444">After logging in, click:</span>
+        <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+          Go to Agents Panel
+        </button>
+        <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+          Refresh Session
+        </button>
+      </div>
+    `);
+
+    const $iframe = $('<iframe>', {
+        id: 'engagecxFrame',
+        src: loginUrl,
+        style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px;'
+    });
+
+    $slot.append($bar, $iframe);
+
+    // Go to Agents Panel
+    $(document).off('click.engagecx-go')
+    .on('click.engagecx-go', '#engagecx-go-agent', function (e) {
+        e.preventDefault();
+        $('#engagecxFrame').attr('src', targetUrl);
+    });
+// CLICK → load login page in iframe + toolbar buttons
+$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    $("#nav-buttons li").removeClass("nav-link-current");
+    $("#nav-engagecx").addClass("nav-link-current");
+    $('.navigation-title').text("EngageCX");
+
+    const $content = $('#content');
+    $content.empty();
+
+    let $slot = $('#engagecx-slot');
+    if (!$slot.length) {
+        $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+    } else {
+        $slot.empty();
+    }
+
+    const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
+
+    // Toolbar with two buttons
+    const $bar = $(`
+      <div style="display:flex;align-items:center;gap:8px;
+           padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+        <span style="font-size:13px;color:#444">After logging in, click:</span>
+        <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+          Go to Agents Panel
+        </button>
+        <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">
+          Refresh Session
+        </button>
+      </div>
+    `);
+
+    const $iframe = $('<iframe>', {
+        id: 'engagecxFrame',
+        src: loginUrl,
+        style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px;'
+    });
+
+    $slot.append($bar, $iframe);
+
+    // Go to Agents Panel
+    $(document).off('click.engagecx-go')
+    .on('click.engagecx-go', '#engagecx-go-agent', function (e) {
+        e.preventDefault();
+        $('#engagecxFrame').attr('src', targetUrl);
+    });
+}); // ✅ CLOSE main click handler here
+
 // Refresh Session → isolated popup login, then auto-load panel
-$(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+$(document).off('click.engagecx-refresh')
+.on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
     const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
     const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
 
-    // Disable Go to Agents Panel while refreshing
     $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Login...');
 
-    // Open login in popup with no opener or referrer → isolates session
     const popup = window.open(
         loginUrlExplicit,
         'EngageCXLogin',
         'width=1024,height=768,noopener,noreferrer'
     );
 
-    // Poll every second to see if popup closed
     const popupTimer = setInterval(() => {
         if (popup.closed) {
             clearInterval(popupTimer);
-            // Auto-load Agent Panel in iframe with fresh session
             $('#engagecxFrame').attr('src', targetUrl);
             $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
         }
