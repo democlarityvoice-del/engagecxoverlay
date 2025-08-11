@@ -1,4 +1,4 @@
-// ===== EngageCX bootstrap (waits for jQuery + nav) =====
+// ===== EngageCX bootstrap (waits for jQuery + nav) ===== this version should actually run everything. 
 // Removed hide profile, added ticket side panel
 ;(function () {
   function when(pred, fn) {
