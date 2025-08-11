@@ -60,7 +60,7 @@
         $slot.empty();
       }
 
-      const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+      const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=';
       const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
       const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
