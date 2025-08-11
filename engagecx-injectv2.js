@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- hide dat profile, gimme menus-- THIS VERSION ABSOLUTELY WORKS!  just needs a couple of cleanups to remove profile
+// --- Clone a tile and make "EngageCX" ---
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -48,7 +48,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
   const agentUrl   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
-  const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard';
+  const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false&showAgentProfile=false';
 
   // Toolbar
   const $bar = $(`
@@ -80,6 +80,23 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     scrolling: 'yes'
   });
 
+  // Hide Agent Profile icon in iframe after load (CSS fallback)
+  $iframe.on('load', function() {
+    try {
+      const iframeDoc = $iframe[0].contentDocument || $iframe[0].contentWindow.document;
+      const style = iframeDoc.createElement('style');
+      style.innerHTML = `
+        .agent-profile,
+        .agent-profile-container {
+          display: none !important;
+        }
+      `;
+      iframeDoc.head.appendChild(style);
+    } catch (err) {
+      console.warn('Could not inject style into iframe:', err);
+    }
+  });
+
   $slot.append($bar, $iframe);
 
   // Go to Agents Panel
@@ -96,7 +113,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session
+  // Refresh Session → logout popup, then reload login in iframe
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
@@ -104,10 +121,8 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
 
     $('#engagecx-go-agent, #engagecx-go-control')
-      .prop('disabled', false) // never disable so user keeps buttons
-      .text(function(index, text) {
-        return text.replace('Waiting for Logout...', 'Go to ' + (index === 0 ? 'Agents Panel' : 'Control Panel'));
-      });
+      .prop('disabled', true)
+      .text('Waiting for Logout...');
 
     const popup = window.open(
       logoutUrl,
@@ -119,6 +134,8 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
       if (popup.closed) {
         clearInterval(popupTimer);
         $('#engagecxFrame').attr('src', loginUrl);
+        $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
+        $('#engagecx-go-control').prop('disabled', false).text('Go to Control Panel');
       }
     }, 1000);
   });
