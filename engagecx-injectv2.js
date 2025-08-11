@@ -82,20 +82,37 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   });
 }); // ✅ Close EngageCX main click handler here
 
-// Refresh Session → force logout then reload login
+// Refresh Session → force real cookie kill + reload login page
 $(document).off('click.engagecx-refresh')
 .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
-    const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
-    const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const loginUrl = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const logoutUrl = 'https://engagecx.clarityvoice.com/logout'; // not hash route
 
     $('#engagecx-go-agent').prop('disabled', true).text('Refreshing...');
 
-    $('#engagecxFrame').attr('src', logoutUrl);
+    // Open a small popup to the real domain so user agent clears cookies
+    const popup = window.open(
+        logoutUrl,
+        'EngageCXLogout',
+        'width=400,height=300,noopener'
+    );
 
-    setTimeout(() => {
+    // Safety: force close popup after 2s in case logout is instant
+    const killTimer = setTimeout(() => {
+        try { popup.close(); } catch (err) {}
         $('#engagecxFrame').attr('src', loginUrl);
         $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
-    }, 1000);
+    }, 2000);
+
+    // If popup is closed early by the user, reload immediately
+    const watcher = setInterval(() => {
+        if (popup.closed) {
+            clearTimeout(killTimer);
+            clearInterval(watcher);
+            $('#engagecxFrame').attr('src', loginUrl);
+            $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
+        }
+    }, 300);
 });
