@@ -79,10 +79,12 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
-  // Refresh Session (reload login page)
-  $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+// Refresh Session (reload login page explicitly)
+$(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
-    $('#engagecxFrame').attr('src', loginUrl);
-  });
+    const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    $('#engagecxFrame').attr('src', loginUrlExplicit);
+});
+
 });
 
