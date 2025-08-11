@@ -39,60 +39,51 @@
     $('#nav-engagecx a').attr('href', '#');
 
     // Function to generate a fresh login URL each time
-    function nextLoginUrl() {
-      return 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now() +
-             '&r=' + Math.random().toString(36).slice(2);
-    }
+function nextLoginUrl() {
+  return 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now() +
+         '&r=' + Math.random().toString(36).slice(2);
+}
 
-    const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
-    const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
+const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
+const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
-    // Build panel on click
+// Build panel on click
 $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
-.on('click.engagecx', '#nav-engagecx,
+.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
 
+  $("#nav-buttons li").removeClass("nav-link-current");
+  $("#nav-engagecx").addClass("nav-link-current");
+  $('.navigation-title').text("EngageCX");
 
-      $("#nav-buttons li").removeClass("nav-link-current");
-      $("#nav-engagecx").addClass("nav-link-current");
-      $('.navigation-title').text("EngageCX");
+  const $content = $('#content').empty();
+  let $slot = $('#engagecx-slot');
+  if (!$slot.length) $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
+  else $slot.empty();
 
-      const $content = $('#content').empty();
-      let $slot = $('#engagecx-slot');
-      if (!$slot.length) $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
-      else $slot.empty();
+  const $bar = $(`
+    <div style="display:flex;flex-direction:column;gap:6px;
+         padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+      <div style="font-size:13px;color:#444;">
+        <strong>Step 1:</strong> Click "Refresh Session" to open a logout popup.<br>
+        <strong>Step 2:</strong> In the popup, click Log Out, then close the popup.<br>
+        <strong>Step 3:</strong> Use "Go to Agents Panel" or "Go to Control Panel" as needed.
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
+        <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
+        <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Refresh Session</button>
+      </div>
+    </div>
+  `);
 
-      const $bar = $(`
-        <div style="display:flex;flex-direction:column;gap:6px;
-             padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
-          <div style="font-size:13px;color:#444;">
-            <strong>Step 1:</strong> Click "Refresh Session" to open a logout popup.<br>
-            <strong>Step 2:</strong> In the popup, click Log Out, then close the popup.<br>
-            <strong>Step 3:</strong> Use "Go to Agents Panel" or "Go to Control Panel" as needed.
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <button id="engagecx-go-agent" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
-            <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
-            <button id="engagecx-refresh" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Refresh Session</button>
-          </div>
-        </div>
-      `);
+  const $iframe = $('<iframe>', {
+    id: 'engagecxFrame',
+    src: nextLoginUrl(), // only fresh on first load or refresh button
+    style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
+    scrolling: 'yes'
+  });
 
-      const $iframe = $('<iframe>', {
-        id: 'engagecxFrame',
-        src: nextLoginUrl(), // use fresh URL
-        style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
-        scrolling: 'yes'
-      });
-
-      $slot.append($bar, $iframe);
-    });
-
-    // Go to Agents Panel
-    $(document).off('click.engagecx-go-agent')
-    .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
-      e.preventDefault();
-      $('#engagecxFrame').attr('src', targetUrl);
-    });
-
-    // Go to Control Panel
-
+  $slot.append($bar, $iframe);
+});
