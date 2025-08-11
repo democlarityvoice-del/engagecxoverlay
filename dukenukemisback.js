@@ -46,9 +46,9 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $slot.empty();
   }
 
-const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false&isTicket=true';
-const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
+  const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
+  const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
 
 
