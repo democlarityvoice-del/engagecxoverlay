@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- FINAL VERSION FOR TESTING!!!
+// --- Clone a tile and make "EngageCX" --- FINAL VERSION FOR TESTING!!! - includes the right-side ticket menu.
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -46,8 +46,11 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $slot.empty();
   }
 
+  // Force desktop layout so right-side rail renders
+  $slot.css({ minWidth: '1280px' });
+
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
   const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
   // Toolbar
@@ -82,17 +85,13 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
 
   $slot.append($bar, $iframe);
 
-  // Utility: Hide Agent Profile icon inside iframe
+  // Utility: Hide Agent Profile icon inside iframe (best effort)
   function hideProfileIcon() {
     try {
       const iframeDoc = document.getElementById('engagecxFrame').contentWindow.document;
       const profileEl = iframeDoc.querySelector('.agent-profile, .profile-wrap, [class*="agentProfile"]');
-      if (profileEl) {
-        profileEl.style.display = 'none';
-      }
-    } catch (err) {
-      console.warn("Could not hide profile icon yet:", err);
-    }
+      if (profileEl) profileEl.style.display = 'none';
+    } catch {}
   }
 
   // Go to Agents Panel
@@ -109,36 +108,29 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → logout popup, then reload login in iframe
+  // Refresh Session → logout popup, then reload login in iframe (non-blocking)
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
 
     const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
-
-    $('#engagecx-go-agent, #engagecx-go-control')
-      .prop('disabled', true)
-      .text('Waiting for Logout...');
-
     const popup = window.open(
       logoutUrl,
       'EngageCXLogout',
       'width=1024,height=768,noopener,noreferrer'
     );
 
-    const popupTimer = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(popupTimer);
+    const timer = setInterval(() => {
+      if (popup && popup.closed) {
+        clearInterval(timer);
         $('#engagecxFrame').attr('src', loginUrl);
-        $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
-        $('#engagecx-go-control').prop('disabled', false).text('Go to Control Panel');
       }
-    }, 1000);
+    }, 800);
   });
 
   // Watch iframe loads to hide profile icon
   $('#engagecxFrame').on('load', function () {
-    setTimeout(hideProfileIcon, 800); // wait a bit for DOM to be ready
+    setTimeout(hideProfileIcon, 800);
   });
 
 });
