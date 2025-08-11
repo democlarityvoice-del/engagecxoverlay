@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" (appearance unchanged) --- TEST TO ATTEMPT A REFRESH CACHE/FRESH TEST COOKIE
+// --- Clone a tile and make "EngageCX" (appearance unchanged) --- TEST TO ATTEMPT REFRESH WITH AUTO LOGIN POP UP IF STUCK COOKIE. 
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -79,12 +79,31 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a').on('click.en
     $('#engagecxFrame').attr('src', targetUrl);
   });
 
-// Refresh Session (reload login page explicitly)
+// Refresh Session → isolated popup login, then auto-load panel
 $(document).off('click.engagecx-refresh').on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
-    const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-    $('#engagecxFrame').attr('src', loginUrlExplicit);
-});
 
+    const loginUrlExplicit = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true';
+
+    // Disable Go to Agents Panel while refreshing
+    $('#engagecx-go-agent').prop('disabled', true).text('Waiting for Login...');
+
+    // Open login in popup with no opener or referrer → isolates session
+    const popup = window.open(
+        loginUrlExplicit,
+        'EngageCXLogin',
+        'width=1024,height=768,noopener,noreferrer'
+    );
+
+    // Poll every second to see if popup closed
+    const popupTimer = setInterval(() => {
+        if (popup.closed) {
+            clearInterval(popupTimer);
+            // Auto-load Agent Panel in iframe with fresh session
+            $('#engagecxFrame').attr('src', targetUrl);
+            $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
+        }
+    }, 1000);
 });
 
