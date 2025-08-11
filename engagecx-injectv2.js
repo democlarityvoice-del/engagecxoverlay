@@ -47,8 +47,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   }
 
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
-';
+  const targetUrl  = 'const targetUrl = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
   const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
   // Toolbar
