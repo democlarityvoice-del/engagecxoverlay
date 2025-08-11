@@ -1,4 +1,4 @@
-// ===== EngageCX bootstrap (waits for jQuery + nav) ===== this version should actually run everything. 
+// ===== EngageCX bootstrap (waits for jQuery + nav) ===== attenpting a full refresh
 // Removed hide profile, added ticket side panel
 ;(function () {
   function when(pred, fn) {
@@ -38,8 +38,12 @@
 
     $('#nav-engagecx a').attr('href', '#');
 
-    // Keep these URLs in scope for the handlers below
-    const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
+    // Function to generate a fresh login URL each time
+    function nextLoginUrl() {
+      return 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now() +
+             '&r=' + Math.random().toString(36).slice(2);
+    }
+
     const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
     const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
@@ -76,7 +80,7 @@
 
       const $iframe = $('<iframe>', {
         id: 'engagecxFrame',
-        src: loginUrl,
+        src: nextLoginUrl(), // use fresh URL
         style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
         scrolling: 'yes'
       });
@@ -92,42 +96,4 @@
     });
 
     // Go to Control Panel
-    $(document).off('click.engagecx-go-control')
-    .on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
-      e.preventDefault();
-      $('#engagecxFrame').attr('src', controlUrl);
-    });
 
-    // Refresh Session → open logout in a popup, then immediately reload login in the iframe.
-    // We NEVER disable the buttons.
-    $(document).off('click.engagecx-refresh')
-    .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
-      e.preventDefault();
-
-      const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
-
-      try {
-        window.open(
-          logoutUrl,
-          'EngageCXLogout',
-          'width=900,height=700,noopener,noreferrer'
-        );
-      } catch (_) {
-        // ignore
-      }
-
-      $('#engagecxFrame').attr('src', loginUrl);
-      setTimeout(() => document.getElementById('engagecxFrame')?.focus(), 50);
-    });
-  }
-
-  // Wait for jQuery, then nav, then start
-  (function waitForJQ(){
-    var jq = window.jQuery || window.$;
-    if (!jq || !jq.fn || !jq.fn.jquery) return void setTimeout(waitForJQ, 300);
-    when(
-      () => jq('#nav-buttons').length && (jq('#nav-music').length || jq('#nav-buttons').children('li').length),
-      start
-    );
-  })();
-})();
