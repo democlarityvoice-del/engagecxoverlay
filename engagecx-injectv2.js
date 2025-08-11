@@ -98,36 +98,36 @@
       $('#engagecxFrame').attr('src', controlUrl);
     });
 
-    // Refresh Session → open logout in a popup, then immediately reload login in the iframe.
-    // We NEVER disable the buttons.
-    $(document).off('click.engagecx-refresh')
-    .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
-      e.preventDefault();
+    // Refresh Session → do logout INSIDE the iframe, then go to fresh login (no popup, never disable buttons)
+$(document).off('click.engagecx-refresh')
+.on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+  e.preventDefault();
 
-      const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
-
-      try {
-        window.open(
-          logoutUrl,
-          'EngageCXLogout',
-          'width=900,height=700,noopener,noreferrer'
-        );
-      } catch (_) {
-        // ignore
-      }
-
-      $('#engagecxFrame').attr('src', loginUrl);
-      setTimeout(() => document.getElementById('engagecxFrame')?.focus(), 50);
-    });
+  // fresh login URL generator (avoid cache/stale redirects)
+  function nextLoginUrl() {
+    return 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now() +
+           '&r=' + Math.random().toString(36).slice(2);
   }
+  const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
+  const $frame = $('#engagecxFrame');
+  if (!$frame.length) return;
 
-  // Wait for jQuery, then nav, then start
-  (function waitForJQ(){
-    var jq = window.jQuery || window.$;
-    if (!jq || !jq.fn || !jq.fn.jquery) return void setTimeout(waitForJQ, 300);
-    when(
-      () => jq('#nav-buttons').length && (jq('#nav-music').length || jq('#nav-buttons').children('li').length),
-      start
-    );
-  })();
-})();
+  // After the logout page finishes loading in the iframe, go to login.
+  $frame.off('load.engagecx-logout').on('load.engagecx-logout', function onLogoutLoad () {
+    $frame.off('load.engagecx-logout');        // run only once
+    $frame.attr('src', nextLoginUrl());         // now show the login screen
+    setTimeout(() => this.focus?.(), 50);
+  });
+
+  // Kick off logout inside the iframe
+  $frame.attr('src', logoutUrl);
+
+  // Safety fallback: if the logout page never fires 'load' (rare), force login after 6s
+  setTimeout(function () {
+    const current = $frame.attr('src') || '';
+    if (current.indexOf('/#/logout') !== -1) {
+      $frame.off('load.engagecx-logout');
+      $frame.attr('src', nextLoginUrl());
+    }
+  }, 6000);
+});
