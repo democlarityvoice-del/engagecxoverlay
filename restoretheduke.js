@@ -1,4 +1,4 @@
-// --- Clone a tile and make "EngageCX" --- RESTORE ORIGINAL VERSION- quick add for the right side menu
+// --- Clone a tile and make "EngageCX" --- FINAL VERSION FOR TESTING!!!
 let existingbutton = $('#nav-music'); // base to clone
 let newbutton = existingbutton.clone();
 
@@ -47,8 +47,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   }
 
   const loginUrl   = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
-  // ⬇️ ONLY CHANGE: load the shell (no /index) and show the layout so the right-side menu renders
-  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&topLayout=true&navigationStyle=Left&showAgentProfile=false';
+  const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=Left&showAgentProfile=false';
   const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
   // Toolbar
@@ -110,7 +109,7 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → logout popup, then reload login in iframe  (left as-is)
+  // Refresh Session → logout popup, then reload login in iframe
   $(document).off('click.engagecx-refresh')
   .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
     e.preventDefault();
@@ -143,4 +142,3 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
   });
 
 });
-
