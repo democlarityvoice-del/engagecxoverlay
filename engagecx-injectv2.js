@@ -96,30 +96,25 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     $('#engagecxFrame').attr('src', controlUrl);
   });
 
-  // Refresh Session → logout popup, then reload login in iframe
-  $(document).off('click.engagecx-refresh')
-  .on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
-    e.preventDefault();
+ // Refresh Session → logout popup, then reload login in iframe
+$(document).off('click.engagecx-refresh')
+.on('click.engagecx-refresh', '#engagecx-refresh', function (e) {
+  e.preventDefault();
 
-    const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
+  const logoutUrl = 'https://engagecx.clarityvoice.com/#/logout?t=' + Date.now();
+  const loginUrl  = 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now();
 
-    $('#engagecx-go-agent, #engagecx-go-control')
-      .prop('disabled', true)
-      .text('Waiting for Logout...');
+  // Open logout popup but leave buttons enabled
+  const popup = window.open(
+    logoutUrl,
+    'EngageCXLogout',
+    'width=1024,height=768,noopener,noreferrer'
+  );
 
-    const popup = window.open(
-      logoutUrl,
-      'EngageCXLogout',
-      'width=1024,height=768,noopener,noreferrer'
-    );
-
-    const popupTimer = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(popupTimer);
-        $('#engagecxFrame').attr('src', loginUrl);
-        $('#engagecx-go-agent').prop('disabled', false).text('Go to Agents Panel');
-        $('#engagecx-go-control').prop('disabled', false).text('Go to Control Panel');
-      }
-    }, 1000);
-  });
+  const popupTimer = setInterval(() => {
+    if (popup.closed) {
+      clearInterval(popupTimer);
+      $('#engagecxFrame').attr('src', loginUrl);
+    }
+  }, 1000);
 });
