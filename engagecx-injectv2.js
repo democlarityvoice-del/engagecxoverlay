@@ -67,8 +67,7 @@
       $right.off('scroll.sync').on('scroll.sync', function () {
         if (_lock) return; _lock = true; $slot.scrollLeft(this.scrollTop); _lock = false;
       });
-      $slot(off='scroll.syncRight'); // ensure clean
-      $slot.on('scroll.syncRight', function () {
+      $slot.off('scroll.syncRight').on('scroll.syncRight', function () {
         if (_lock) return; _lock = true; $right.scrollTop($slot.scrollLeft()); _lock = false;
       });
       updateRightScroll();
@@ -131,9 +130,7 @@
       updateTopScroll(); updateRightScroll();
     }
 
-    // ---------- Persist via detach / re-attach ----------
-    let $engSlot = null; // holds detached slot
-
+    // ---------- Persistent root outside #content (hide/show only) ----------
     $('#nav-engagecx, #nav-engagecx a')
       .off('click.engagecx')
       .on('click.engagecx', function (e) {
@@ -143,17 +140,28 @@
         $('#nav-engagecx').addClass('nav-link-current');
         $('.navigation-title').text('EngageCX');
 
-        const $content = $('#content').empty();
-
-        if ($engSlot && $engSlot.length) {
-          // Re-attach existing slot/iframe (no new login)
-          $engSlot.appendTo($content).show();
-          setupTopScroll(); setupRightScroll(); applyExpandState();
+        let $root = $('#engagecx-root');
+        if ($root.length) {
+          $root.show();
+          const $f = $('#engagecxFrame');
+          if ($f.length) {
+            // soft refresh the current route so data/ws wake up (no re-login)
+            const cur = $f.attr('src') || '';
+            if (cur.includes('#/agentConsole')) {
+              $f.attr('src', targetUrl + '&poke=' + Date.now());
+            } else if (cur.includes('#/admin/widget')) {
+              $f.attr('src', controlUrl + '&poke=' + Date.now());
+            }
+          }
+          applyExpandState();
           return;
         }
 
-        // First time
-        $engSlot = $('<div id="engagecx-slot"></div>').appendTo($content);
+        // First time: create persistent root outside main content
+        $root = $('<div id="engagecx-root" style="position:relative;width:100%;z-index:2147483647;"></div>').appendTo('body');
+
+        // slot + toolbar + iframe
+        const $slot = $('<div id="engagecx-slot"></div>').appendTo($root);
 
         const $bar = $(`
           <div style="display:flex;flex-direction:column;gap:6px;
@@ -166,35 +174,34 @@
               <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
             </div>
           </div>
-        `).appendTo($engSlot);
+        `).appendTo($slot);
 
-        setupTopScroll(); // inside slot
+        setupTopScroll();
 
         const $iframe = $('<iframe>', {
           id: 'engagecxFrame',
-          src: nextLoginUrl(),
+          src: targetUrl, // let cookie drive: login if needed, else straight in
           style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
           scrolling: 'yes'
         }).on('load', function () {
           nudgeIframe(); applyExpandState();
         });
 
-        $engSlot.append($iframe);
+        $slot.append($iframe);
         setupRightScroll(); applyExpandState();
       });
 
-    // Detach (keep alive) when navigating elsewhere
+    // Hide persistent root when switching to any other nav item
     $(document).off('click.engagecx-hide')
       .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
-        const $slot = $('#engagecx-slot');
-        if ($slot.length) { $engSlot = $slot.detach(); }
+        $('#engagecx-root').hide();
       });
 
     // Go to Agents Panel
     $(document).off('click.engagecx-go-agent')
       .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
         e.preventDefault();
-        $('#engagecxFrame').attr('src', targetUrl);
+        $('#engagecxFrame').attr('src', targetUrl + '&poke=' + Date.now());
         nudgeIframe(); applyExpandState();
       });
 
@@ -202,7 +209,7 @@
     $(document).off('click.engagecx-go-control')
       .on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
         e.preventDefault();
-        $('#engagecxFrame').attr('src', controlUrl);
+        $('#engagecxFrame').attr('src', controlUrl + '&poke=' + Date.now());
         nudgeIframe(); applyExpandState();
       });
 
@@ -229,7 +236,7 @@
       .on('resize.engagecx-scrolls', function () { updateTopScroll(); updateRightScroll(); });
   }
 
-  // Bootstrap
+  // Bootstrap: wait for jQuery and nav
   (function waitForJQ() {
     const jq = window.jQuery || window.$;
     if (!jq || !jq.fn || !jq.fn.jquery) return void setTimeout(waitForJQ, 300);
