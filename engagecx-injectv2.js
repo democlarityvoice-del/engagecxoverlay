@@ -11,6 +11,53 @@
     let $template = $('#nav-music');
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
+  // ---- Cover the "Log out" menu row with a white, inert pill (over the iframe) ----
+// Tune these if needed after a quick eyeball check.
+const LOGOUT_TOP_PX   = 295;  // distance from the iframe's top to the "Log out" row
+const LOGOUT_RIGHT_PX = 18;   // distance from the iframe's right edge to the menu edge
+const LOGOUT_WIDTH_PX = 230;  // width of the dropdown menu row
+const LOGOUT_HEIGHT_PX= 38;   // height of the "Log out" row
+
+function ensureLogoutCover() {
+  let $cover = $('#engagecx-logout-cover');
+  if (!$cover.length) {
+    $cover = $('<div id="engagecx-logout-cover">Use “Refresh / Log out”</div>').appendTo('#engagecx-slot');
+    $cover.css({
+      position: 'absolute',
+      zIndex: 50,                // above iframe, below sticky toolbar
+      background: '#fff',        // same white as the menu
+      color: '#6b7280',          // subtle grey label
+      borderRadius: '6px',
+      fontSize: '12px',
+      lineHeight: '1',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 0 0 0 transparent',
+      pointerEvents: 'auto',     // eat clicks so the real Logout never gets them
+      cursor: 'default',
+      userSelect: 'none'
+      // debug outline if you need to adjust: border:'1px solid red'
+    })
+    .on('click mousedown mouseup', function(e){ e.preventDefault(); e.stopPropagation(); });
+  }
+  positionLogoutCover();
+}
+
+function positionLogoutCover() {
+  const $slot = $('#engagecx-slot');
+  const $cover = $('#engagecx-logout-cover');
+  if (!$slot.length || !$cover.length) return;
+
+  $slot.css({ position: 'relative', overflowX: 'auto' }); // already set by expand mode, harmless otherwise
+  $cover.css({
+    top:   LOGOUT_TOP_PX + 'px',
+    right: LOGOUT_RIGHT_PX + 'px',
+    width: LOGOUT_WIDTH_PX + 'px',
+    height: LOGOUT_HEIGHT_PX + 'px'
+  });
+}
+// -------------------------------------------------------------------------------
 
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
@@ -92,19 +139,20 @@
       else $slot.empty();
 
   const $bar = $(`
-    <div style="display:flex;flex-direction:column;gap:6px;
+  <div style="display:flex;flex-direction:column;gap:6px;
        padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
       <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
       <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
-        title="Clears the current session and returns the iframe to the login page.">
-        Refresh Session
+        title="Click to refresh session or login/logout.">
+        Refresh / Log out
       </button>
       <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
     </div>
   </div>
 `);
+
 
 
       const $iframe = $('<iframe>', {
