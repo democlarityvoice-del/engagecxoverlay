@@ -12,29 +12,45 @@
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
 
-    -------------------------------------------------------------------------------
-  function ensureLogoutCover() {
+    //-------------------------------------------------------------------------------
+  // keep the cover sized/placed
+function positionLogoutCover() {
+  const $slot  = $('#engagecx-slot');
+  const $cover = $('#engagecx-logout-cover');
+  if (!$slot.length || !$cover.length) return;
+
+  $slot.css({ position: 'relative', overflowX: 'auto' });
+  $cover.css({
+    top:   LOGOUT_TOP_PX + 'px',
+    right: LOGOUT_RIGHT_PX + 'px',
+    width: LOGOUT_WIDTH_PX + 'px',
+    height: LOGOUT_HEIGHT_PX + 'px'
+  });
+}
+
+// create (if needed) + make it invisible but click-blocking, then position it
+function ensureLogoutCover() {
   let $cover = $('#engagecx-logout-cover');
   if (!$cover.length) {
     $cover = $('<div id="engagecx-logout-cover"></div>').appendTo('#engagecx-slot');
   }
-  // make it invisible but clickable (to block the real Logout)
   $cover
-    .text('') // remove any prior label
-    .attr('title','')
+    .text('').attr('title','')
     .css({
       position: 'absolute',
-      zIndex: 50,            // above iframe, below toolbar
+      zIndex: 50,
       background: 'transparent',
       borderRadius: '6px',
-      pointerEvents: 'auto', // eat clicks
+      pointerEvents: 'auto',  // eat clicks so Logout can’t be clicked
       cursor: 'default',
       userSelect: 'none'
     })
-    .on('click mousedown mouseup', function(e){ e.preventDefault(); e.stopPropagation(); });
+    .off('click mousedown mouseup')
+    .on('click mousedown mouseup', e => { e.preventDefault(); e.stopPropagation(); });
 
-  positionLogoutCover(); // keep using your existing function
+  positionLogoutCover();
 }
+
 
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
