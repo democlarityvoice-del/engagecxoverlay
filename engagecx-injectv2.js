@@ -87,6 +87,14 @@
       'background-color':    'rgba(255,255,255,0.92)'
     });
 
+// after: if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
+$new.find('a')
+  .off('click.engagecx-direct')
+  .on('click.engagecx-direct', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    $('#nav-engagecx').trigger('click'); // call our handler directly
+  });
+
     const $after = $('#nav-callhistory');
     if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
 
@@ -139,7 +147,8 @@
       $('.navigation-title').text('EngageCX');
 
    // ← ADD THIS LINE HERE
-      let $root = $('#engagecx-root');
+      $root = $('<div id="engagecx-root" style="position:relative;width:100%;z-index:2147483647;"></div>').appendTo('body');
+
 
       // If already mounted, just show it (do NOT recreate iframe)
       if ($root.length) {
