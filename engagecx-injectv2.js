@@ -11,41 +11,43 @@
     let $template = $('#nav-music');
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
-  // Top scrollbar helpers
-function updateTopScroll() {
-  const $slot = $('#engagecx-slot');
-  const $track = $('#engagecx-scrolltop .track');
-  if ($slot.length && $track.length) {
-    $track.width($slot[0].scrollWidth || 0);
-  }
-}
 
-function setupTopScroll() {
-  const $slot = $('#engagecx-slot');
-  if (!$slot.length) return;
-  $top.find('.track').css({ display:'block', height:'1px' });
+    // Top scrollbar helpers
+    function updateTopScroll() {
+      const $slot = $('#engagecx-slot');
+      const $track = $('#engagecx-scrolltop .track');
+      if ($slot.length && $track.length) {
+        $track.width($slot[0].scrollWidth || 0);
+      }
+    }
 
-  let $top = $('#engagecx-scrolltop');
-  if (!$top.length) {
-    $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
-      .css({ height:'14px', overflowX:'auto', overflowY:'hidden', position:'sticky', top:0, zIndex:30, background:'#fafafa' });
-    // insert just below the toolbar, above the iframe
-    $slot.append($bar, $iframe);
-    setupTopScroll();   // add this line here
+    function setupTopScroll() {
+      const $slot = $('#engagecx-slot');
+      if (!$slot.length) return;
 
-    $top.insertAfter($('#engagecx-slot').children().first());
+      let $top = $('#engagecx-scrolltop');
+      if (!$top.length) {
+        $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
+          .css({ height:'14px', overflowX:'auto', overflowY:'hidden', position:'sticky', top:0, zIndex:30, background:'#fafafa' });
+        // insert just below the toolbar, above the iframe
+        const $first = $slot.children().first();
+        if ($first.length) $top.insertAfter($first); else $slot.prepend($top);
+      }
+      $top.find('.track').css({ display:'block', height:'1px' });
 
-  }
+      let lock = false;
+      $top.off('scroll.sync').on('scroll.sync', function(){
+        if (lock) return; lock = true; $slot.scrollLeft(this.scrollLeft); lock = false;
+      });
+      $slot.off('scroll.sync').on('scroll.sync', function(){
+        if (lock) return; lock = true; $top.scrollLeft(this.scrollLeft); lock = false;
+      });
 
-  let lock = false;
-  $top.off('scroll.sync').on('scroll.sync', function(){ if (lock) return; lock = true; $slot.scrollLeft(this.scrollLeft); lock = false; });
-  $slot.off('scroll.sync').on('scroll.sync', function(){ if (lock) return; lock = true; $top.scrollLeft(this.scrollLeft); lock = false; });
-
-  updateTopScroll();
-}
+      updateTopScroll();
+    }
 
     //-------------------------------------------------------------------------------
- 
+
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
     $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
@@ -107,7 +109,6 @@ function setupTopScroll() {
       nudgeIframe();
       $('#engagecx-expand').text(isExpanded ? 'Reset Width' : 'Expand / Scroll Right');
       updateTopScroll();
-
     }
 
     $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
@@ -148,12 +149,12 @@ function setupTopScroll() {
       $iframe.on('load', function () {
         nudgeIframe();
         applyExpandState();
-        positionLogoutCover();    // keep cover aligned after route changes
+        updateTopScroll();
       });
 
       $slot.append($bar, $iframe);
+      setupTopScroll();   // add top scrollbar
       applyExpandState();
-      ensureLogoutCover();        // create + position the cover
     });
 
     // Go to Agents Panel
@@ -163,7 +164,7 @@ function setupTopScroll() {
       $('#engagecxFrame').attr('src', targetUrl);
       nudgeIframe();
       applyExpandState();
-      positionLogoutCover();
+      updateTopScroll();
     });
 
     // Go to Control Panel
@@ -173,7 +174,7 @@ function setupTopScroll() {
       $('#engagecxFrame').attr('src', controlUrl);
       nudgeIframe();
       applyExpandState();
-      positionLogoutCover();
+      updateTopScroll();
     });
 
     // Refresh Session
@@ -190,7 +191,7 @@ function setupTopScroll() {
       $('#engagecxFrame').attr('src', nextLoginUrl());
       nudgeIframe();
       applyExpandState();
-      positionLogoutCover();
+      updateTopScroll();
     });
 
     // expand/scroll-right toggle handler
@@ -199,11 +200,11 @@ function setupTopScroll() {
       e.preventDefault();
       isExpanded = !isExpanded;
       applyExpandState();
-      positionLogoutCover();
+      updateTopScroll();
     });
 
-    // keep cover aligned on window resizes
-    $(window).off('resize.engagecx-cover').on('resize.engagecx-cover', positionLogoutCover);
+    // keep track width in sync on resize
+    $(window).off('resize.engagecx-topscroll').on('resize.engagecx-topscroll', updateTopScroll);
   }
 
   (function waitForJQ() {
