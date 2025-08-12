@@ -70,6 +70,7 @@
 
     //-------------------------------------------------------------------------------
 
+    // Build EngageCX nav tile (clone)
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
     $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
@@ -128,6 +129,7 @@
       updateRightScroll();
     }
 
+    // EngageCX nav: persist iframe once (no re-login)
     $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
     .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
       e.preventDefault(); e.stopPropagation();
@@ -135,56 +137,16 @@
       $('#nav-buttons li').removeClass('nav-link-current');
       $('#nav-engagecx').addClass('nav-link-current');
       $('.navigation-title').text('EngageCX');
-$(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
-.on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
-  e.preventDefault(); e.stopPropagation();
 
-  $('#nav-buttons li').removeClass('nav-link-current');
-  $('#nav-engagecx').addClass('nav-link-current');
-  $('.navigation-title').text('EngageCX');
+      // If already mounted, just show it (do NOT recreate iframe)
+      let $root = $('#engagecx-root');
+      if ($root.length) { $root.show(); return; }
 
-  // If already mounted, just show it and bail (no new login)
-  let $root = $('#engagecx-root');
-  if ($root.length) { $root.show(); return; }
+      // First time: create persistent root outside #content
+      $root = $('<div id="engagecx-root" style="position:relative;"></div>').appendTo('body');
 
-  // First time: create a persistent root outside #content
-  $root = $('<div id="engagecx-root" style="position:relative;"></div>').appendTo('body');
-
-  // slot + toolbar + iframe (login only once here)
-  const $slot = $('<div id="engagecx-slot"></div>').appendTo($root);
-
-  const $bar = $(`
-    <div style="display:flex;flex-direction:column;gap:6px;
-         padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
-        <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
-        <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
-          title="Click to refresh session or login/logout.">Refresh / Log out</button>
-        <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
-      </div>
-    </div>
-  `);
-
-  const $iframe = $('<iframe>', {
-    id: 'engagecxFrame',
-    src: nextLoginUrl(), // login ONLY on first mount
-    style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
-    scrolling: 'yes'
-  });
-
-  $iframe.on('load', function () {
-    nudgeIframe();
-    applyExpandState();
-    updateTopScroll?.();
-    updateRightScroll?.();
-  });
-
-  $slot.append($bar, $iframe);
-  setupTopScroll?.();
-  setupRightScroll?.();
-  applyExpandState();
-});
+      // slot + toolbar + iframe (login only once here)
+      const $slot = $('<div id="engagecx-slot"></div>').appendTo($root);
 
       const $bar = $(`
         <div style="display:flex;flex-direction:column;gap:6px;
@@ -192,19 +154,16 @@ $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
             <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
-            <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;" title="Click to refresh session or login/logout.">Refresh / Log out</button>
+            <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
+              title="Click to refresh session or login/logout.">Refresh / Log out</button>
             <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
           </div>
         </div>
       `);
-$(document).off('click.engagecx-hide')
-.on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
-  $('#engagecx-root').hide(); // keep session alive, just hide
-});
 
       const $iframe = $('<iframe>', {
         id: 'engagecxFrame',
-        src: nextLoginUrl(),
+        src: nextLoginUrl(), // login ONLY on first mount
         style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
         scrolling: 'yes'
       });
@@ -220,6 +179,12 @@ $(document).off('click.engagecx-hide')
       setupTopScroll();
       setupRightScroll();
       applyExpandState();
+    });
+
+    // Hide persistent root when switching to any other nav item
+    $(document).off('click.engagecx-hide')
+    .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
+      $('#engagecx-root').hide();
     });
 
     // Go to Agents Panel
