@@ -28,15 +28,13 @@
       const $slot = $('#engagecx-slot'); if (!$slot.length) return;
       let $top = $('#engagecx-scrolltop');
       if (!$top.length) {
-        $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
-          .css({
-            height:'16px', overflowX:'scroll', overflowY:'hidden',
-            position:'sticky', top:0, zIndex:30, background:'#fafafa', width:'100%'
-          });
-        // place INSIDE the slot, just under the toolbar so it travels with detach/attach
-        const $bar = $slot.children().first();
-        ($bar.length ? $top.insertAfter($bar) : $slot.prepend($top));
-        $top.find('.track').css({display:'block', height:'1px'});
+        $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>').css({
+          height:'16px', overflowX:'scroll', overflowY:'hidden',
+          position:'sticky', top:0, zIndex:30, background:'#fafafa', width:'100%'
+        });
+        const $first = $slot.children().first();
+        ($first.length ? $top.insertAfter($first) : $slot.prepend($top));
+        $top.find('.track').css({ display:'block', height:'1px' });
       }
       $top.off('scroll.sync').on('scroll.sync', function () {
         if (_lock) return; _lock = true; $slot.scrollLeft(this.scrollLeft); _lock = false;
@@ -59,18 +57,18 @@
       const $slot = $('#engagecx-slot'); if (!$slot.length) return;
       let $right = $('#engagecx-scrollright');
       if (!$right.length) {
-        $right = $('<div id="engagecx-scrollright"><div class="vtrack"></div></div>')
-          .css({
-            width:'16px', overflowY:'auto', overflowX:'hidden',
-            position:'sticky', top:0, alignSelf:'flex-end', zIndex:30, background:'#fafafa'
-          });
+        $right = $('<div id="engagecx-scrollright"><div class="vtrack"></div></div>').css({
+          width:'16px', overflowY:'auto', overflowX:'hidden',
+          position:'sticky', top:0, alignSelf:'flex-end', zIndex:30, background:'#fafafa'
+        });
         $slot.append($right);
       }
-      $right.find('.vtrack').css({display:'block', width:'1px'});
+      $right.find('.vtrack').css({ display:'block', width:'1px' });
       $right.off('scroll.sync').on('scroll.sync', function () {
         if (_lock) return; _lock = true; $slot.scrollLeft(this.scrollTop); _lock = false;
       });
-      $slot.off('scroll.syncRight').on('scroll.syncRight', function () {
+      $slot(off='scroll.syncRight'); // ensure clean
+      $slot.on('scroll.syncRight', function () {
         if (_lock) return; _lock = true; $right.scrollTop($slot.scrollLeft()); _lock = false;
       });
       updateRightScroll();
@@ -94,7 +92,6 @@
       'mask-size':           '71% 71%',
       'background-color':    'rgba(255,255,255,0.92)'
     });
-
     const $after = $('#nav-callhistory');
     if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
 
@@ -104,15 +101,14 @@
     const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
     const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
-    // --- layout helpers ---
+    // --- layout helper ---
     function nudgeIframe() {
       const $f = $('#engagecxFrame');
       if (!$f.length) return;
       const el = $f[0];
       const origW = el.style.width || '100%';
-      const pulses = [0, 150, 400, 900, 1600];
-      pulses.forEach(ms => {
-        setTimeout(() => { $f.css('width', '99.6%'); void el.offsetWidth; $f.css('width', origW); window.dispatchEvent(new Event('resize')); }, ms);
+      [0,150,400,900,1600].forEach(ms => {
+        setTimeout(() => { $f.css('width','99.6%'); void el.offsetWidth; $f.css('width',origW); window.dispatchEvent(new Event('resize')); }, ms);
       });
     }
 
@@ -120,10 +116,9 @@
     let isExpanded = false;
     const EXPAND_PX = 420;
     function applyExpandState() {
-      const $slot = $('#engagecx-slot');
-      const $f = $('#engagecxFrame');
+      const $slot = $('#engagecx-slot'), $f = $('#engagecxFrame');
       if (!$slot.length || !$f.length) return;
-      $slot.css({ position: 'relative', overflowX: 'auto' });
+      $slot.css({ position:'relative', overflowX:'auto' });
       if (isExpanded) {
         $f.css('width', `calc(100% + ${EXPAND_PX}px)`);
         requestAnimationFrame(() => { $slot[0].scrollLeft = $slot[0].scrollWidth; });
@@ -133,11 +128,12 @@
       }
       nudgeIframe();
       $('#engagecx-expand').text(isExpanded ? 'Reset Width' : 'Expand / Scroll Right');
-      updateTopScroll();
-      updateRightScroll();
+      updateTopScroll(); updateRightScroll();
     }
 
-    // ---------- EngageCX nav: mount inside #content (persist via detach/attach) ----------
+    // ---------- Persist via detach / re-attach ----------
+    let $engSlot = null; // holds detached slot
+
     $('#nav-engagecx, #nav-engagecx a')
       .off('click.engagecx')
       .on('click.engagecx', function (e) {
@@ -147,27 +143,17 @@
         $('#nav-engagecx').addClass('nav-link-current');
         $('.navigation-title').text('EngageCX');
 
-        // Ensure a hidden cache exists to park the slot when navigating away
-        let $cache = $('#engagecx-cache');
-        if (!$cache.length) {
-          $cache = $('<div id="engagecx-cache" style="position:absolute;left:-99999px;top:-99999px;width:1px;height:1px;overflow:hidden;"></div>').appendTo('body');
-        }
-
         const $content = $('#content').empty();
 
-        // If we already built the slot before, bring it back from the cache (no re-login)
-        let $slot = $('#engagecx-slot');
-        if (!$slot.length) $slot = $('#engagecx-cache #engagecx-slot'); // parked
-        if ($slot.length) {
-          $slot.appendTo($content).show();
-          setupTopScroll();    // rewire scroll sync (DOM moved)
-          setupRightScroll();
-          applyExpandState();
+        if ($engSlot && $engSlot.length) {
+          // Re-attach existing slot/iframe (no new login)
+          $engSlot.appendTo($content).show();
+          setupTopScroll(); setupRightScroll(); applyExpandState();
           return;
         }
 
-        // First time: build slot + toolbar + iframe
-        $slot = $('<div id="engagecx-slot"></div>').appendTo($content);
+        // First time
+        $engSlot = $('<div id="engagecx-slot"></div>').appendTo($content);
 
         const $bar = $(`
           <div style="display:flex;flex-direction:column;gap:6px;
@@ -180,39 +166,28 @@
               <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
             </div>
           </div>
-        `).appendTo($slot);
+        `).appendTo($engSlot);
 
-        // Top scrollbar goes INSIDE slot so it persists with detach/attach
-        setupTopScroll();
+        setupTopScroll(); // inside slot
 
         const $iframe = $('<iframe>', {
           id: 'engagecxFrame',
-          src: nextLoginUrl(), // first load -> login page
+          src: nextLoginUrl(),
           style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
           scrolling: 'yes'
         }).on('load', function () {
-          nudgeIframe();
-          applyExpandState();
-          updateTopScroll();
-          updateRightScroll();
+          nudgeIframe(); applyExpandState();
         });
 
-        $slot.append($iframe);
-        setupRightScroll();
-        applyExpandState();
+        $engSlot.append($iframe);
+        setupRightScroll(); applyExpandState();
       });
 
-    // Park the slot (keep iframe alive) when switching to any other nav
+    // Detach (keep alive) when navigating elsewhere
     $(document).off('click.engagecx-hide')
       .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
         const $slot = $('#engagecx-slot');
-        if ($slot.length) {
-          let $cache = $('#engagecx-cache');
-          if (!$cache.length) {
-            $cache = $('<div id="engagecx-cache" style="position:absolute;left:-99999px;top:-99999px;width:1px;height:1px;overflow:hidden;"></div>').appendTo('body');
-          }
-          $slot.appendTo($cache).hide(); // detach without destroying (cookies/session survive)
-        }
+        if ($slot.length) { $engSlot = $slot.detach(); }
       });
 
     // Go to Agents Panel
@@ -220,10 +195,7 @@
       .on('click.engagecx-go-agent', '#engagecx-go-agent', function (e) {
         e.preventDefault();
         $('#engagecxFrame').attr('src', targetUrl);
-        nudgeIframe();
-        applyExpandState();
-        updateTopScroll();
-        updateRightScroll();
+        nudgeIframe(); applyExpandState();
       });
 
     // Go to Control Panel
@@ -231,10 +203,7 @@
       .on('click.engagecx-go-control', '#engagecx-go-control', function (e) {
         e.preventDefault();
         $('#engagecxFrame').attr('src', controlUrl);
-        nudgeIframe();
-        applyExpandState();
-        updateTopScroll();
-        updateRightScroll();
+        nudgeIframe(); applyExpandState();
       });
 
     // Refresh Session
@@ -245,20 +214,14 @@
           window.open('https://engagecx.clarityvoice.com/#/logout?t=' + Date.now(), 'EngageCXLogout', 'width=900,height=700,noopener,noreferrer');
         } catch {}
         $('#engagecxFrame').attr('src', nextLoginUrl());
-        nudgeIframe();
-        applyExpandState();
-        updateTopScroll();
-        updateRightScroll();
+        nudgeIframe(); applyExpandState();
       });
 
     // Expand / Reset
     $(document).off('click.engagecx-expand')
       .on('click.engagecx-expand', '#engagecx-expand', function (e) {
         e.preventDefault();
-        isExpanded = !isExpanded;
-        applyExpandState();
-        updateTopScroll();
-        updateRightScroll();
+        isExpanded = !isExpanded; applyExpandState();
       });
 
     // Keep tracks in sync on resize
@@ -266,7 +229,7 @@
       .on('resize.engagecx-scrolls', function () { updateTopScroll(); updateRightScroll(); });
   }
 
-  // Bootstrap: wait for jQuery and nav
+  // Bootstrap
   (function waitForJQ() {
     const jq = window.jQuery || window.$;
     if (!jq || !jq.fn || !jq.fn.jquery) return void setTimeout(waitForJQ, 300);
