@@ -20,31 +20,56 @@
         $track.width($slot[0].scrollWidth || 0);
       }
     }
+    // === Top & Right scrollbars (sync with #engagecx-slot) ===
+let _lock = false;
 
-    function setupTopScroll() {
-      const $slot = $('#engagecx-slot');
-      if (!$slot.length) return;
+function updateTopScroll() {
+  const $slot = $('#engagecx-slot'), $track = $('#engagecx-scrolltop .track');
+  if ($slot.length && $track.length) $track.width($slot[0].scrollWidth || 0);
+}
+function setupTopScroll() {
+  const $slot = $('#engagecx-slot'); if (!$slot.length) return;
+  let $top = $('#engagecx-scrolltop');
+  if (!$top.length) {
+    $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
+      .css({height:'16px',overflowX:'auto',overflowY:'hidden',position:'sticky',top:0,zIndex:30,background:'#fafafa',width:'100%'});
+    const $first = $slot.children().first(); ($first.length ? $top.insertAfter($first) : $slot.prepend($top));
+    $top.find('.track').css({display:'block',height:'1px'});
+  }
+  $top.off('scroll.sync').on('scroll.sync', function(){
+    if (_lock) return; _lock = true; $slot.scrollLeft(this.scrollLeft); _lock = false;
+  });
+  $slot.off('scroll.syncTop').on('scroll.syncTop', function(){
+    if (_lock) return; _lock = true; $top.scrollLeft(this.scrollLeft); _lock = false;
+  });
+  updateTopScroll();
+}
 
-      let $top = $('#engagecx-scrolltop');
-      if (!$top.length) {
-        $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
-          .css({ height:'14px', overflowX:'auto', overflowY:'hidden', position:'sticky', top:0, zIndex:30, background:'#fafafa' });
-        // insert just below the toolbar, above the iframe
-        const $first = $slot.children().first();
-        if ($first.length) $top.insertAfter($first); else $slot.prepend($top);
-      }
-      $top.find('.track').css({ display:'block', height:'1px' });
-
-      let lock = false;
-      $top.off('scroll.sync').on('scroll.sync', function(){
-        if (lock) return; lock = true; $slot.scrollLeft(this.scrollLeft); lock = false;
-      });
-      $slot.off('scroll.sync').on('scroll.sync', function(){
-        if (lock) return; lock = true; $top.scrollLeft(this.scrollLeft); lock = false;
-      });
-
-      updateTopScroll();
-    }
+function updateRightScroll() {
+  const $slot = $('#engagecx-slot'), $track = $('#engagecx-scrollright .vtrack');
+  if ($slot.length && $track.length) {
+    $track.height($slot[0].scrollWidth || 0);                 // map vertical to horizontal
+    $('#engagecx-scrollright').height($slot.innerHeight()||0); // match visible height
+  }
+}
+function setupRightScroll() {
+  const $slot = $('#engagecx-slot'); if (!$slot.length) return;
+  let $right = $('#engagecx-scrollright');
+  if (!$right.length) {
+    $right = $('<div id="engagecx-scrollright"><div class="vtrack"></div></div>')
+      .css({width:'16px',overflowY:'auto',overflowX:'hidden',position:'sticky',top:0,alignSelf:'flex-end',zIndex:30,background:'#fafafa'});
+    // place as last child so it sits on the right side of slot
+    $slot.append($right);
+  }
+  $right.find('.vtrack').css({display:'block',width:'1px'});
+  $right.off('scroll.sync').on('scroll.sync', function(){
+    if (_lock) return; _lock = true; $slot.scrollLeft(this.scrollTop); _lock = false;
+  });
+  $slot.off('scroll.syncRight').on('scroll.syncRight', function(){
+    if (_lock) return; _lock = true; $right.scrollTop($slot.scrollLeft()); _lock = false;
+  });
+  updateRightScroll();
+}
 
     //-------------------------------------------------------------------------------
 
