@@ -12,49 +12,29 @@
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
 
-    // ---- Cover the "Log out" menu row with a white, inert pill (over the iframe) ----
-    const LOGOUT_TOP_PX   = 295;  // distance from the iframe's top to the "Log out" row
-    const LOGOUT_RIGHT_PX = 18;   // distance from the iframe's right edge to the menu edge
-    const LOGOUT_WIDTH_PX = 230;  // width of the dropdown menu row
-    const LOGOUT_HEIGHT_PX= 38;   // height of the "Log out" row
+    -------------------------------------------------------------------------------
+  function ensureLogoutCover() {
+  let $cover = $('#engagecx-logout-cover');
+  if (!$cover.length) {
+    $cover = $('<div id="engagecx-logout-cover"></div>').appendTo('#engagecx-slot');
+  }
+  // make it invisible but clickable (to block the real Logout)
+  $cover
+    .text('') // remove any prior label
+    .attr('title','')
+    .css({
+      position: 'absolute',
+      zIndex: 50,            // above iframe, below toolbar
+      background: 'transparent',
+      borderRadius: '6px',
+      pointerEvents: 'auto', // eat clicks
+      cursor: 'default',
+      userSelect: 'none'
+    })
+    .on('click mousedown mouseup', function(e){ e.preventDefault(); e.stopPropagation(); });
 
-    function ensureLogoutCover() {
-      let $cover = $('#engagecx-logout-cover');
-      if (!$cover.length) {
-        $cover = $('<div id="engagecx-logout-cover">Use “Refresh / Log out”</div>').appendTo('#engagecx-slot');
-        $cover.css({
-          position: 'absolute',
-          zIndex: 50,                // above iframe, below sticky toolbar
-          background: '#fff',        // same white as the menu
-          color: '#6b7280',          // subtle grey label
-          borderRadius: '6px',
-          fontSize: '12px',
-          lineHeight: '1',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 0 0 0 transparent',
-          pointerEvents: 'auto',     // eat clicks so the real Logout never gets them
-          cursor: 'default',
-          userSelect: 'none'
-        }).on('click mousedown mouseup', function(e){ e.preventDefault(); e.stopPropagation(); });
-      }
-      positionLogoutCover();
-    }
-
-    function positionLogoutCover() {
-      const $slot = $('#engagecx-slot');
-      const $cover = $('#engagecx-logout-cover');
-      if (!$slot.length || !$cover.length) return;
-      $slot.css({ position: 'relative', overflowX: 'auto' }); // harmless if already set
-      $cover.css({
-        top:   LOGOUT_TOP_PX + 'px',
-        right: LOGOUT_RIGHT_PX + 'px',
-        width: LOGOUT_WIDTH_PX + 'px',
-        height: LOGOUT_HEIGHT_PX + 'px'
-      });
-    }
-    // -------------------------------------------------------------------------------
+  positionLogoutCover(); // keep using your existing function
+}
 
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
