@@ -23,17 +23,17 @@ function updateTopScroll() {
 function setupTopScroll() {
   const $slot = $('#engagecx-slot');
   if (!$slot.length) return;
+  $top.find('.track').css({ display:'block', height:'1px' });
 
   let $top = $('#engagecx-scrolltop');
   if (!$top.length) {
     $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
       .css({ height:'14px', overflowX:'auto', overflowY:'hidden', position:'sticky', top:0, zIndex:30, background:'#fafafa' });
     // insert just below the toolbar, above the iframe
-    $top.insertAfter($('#engagecx-slot').children().first());
     $slot.append($bar, $iframe);
-    setupTopScroll();
-    updateTopScroll();
+    setupTopScroll();   // add this line here
 
+    $top.insertAfter($('#engagecx-slot').children().first());
 
   }
 
