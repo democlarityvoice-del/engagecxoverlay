@@ -135,27 +135,8 @@
       updateRightScroll();
     }
 
-    // ---------- EngageCX nav: persist iframe once (no re-login) ----------
-    // Bind directly (not delegated) so bubbling blockers won't kill it
-    $('#nav-engagecx, #nav-engagecx a')
-      .off('click.engagecx')
-      .on('click.engagecx', function (e) {
-        e.preventDefault(); e.stopPropagation();
-
-        $('#nav-buttons li').removeClass('nav-link-current');
-        $('#nav-engagecx').addClass('nav-link-current');
-        $('.navigation-title').text('EngageCX');
-
-        let $root = $('#engagecx-root');
-        if ($root.length) {
-          $root.show();
-          $('#engagecxFrame').css('display','block');
-          applyExpandState();
-          updateTopScroll();
-          updateRightScroll();
-          return;
-        }
-
+    
+// ---------- EngageCX nav: persist iframe (no re-login) ----------
 // ---------- EngageCX nav: persist iframe (no re-login) ----------
 $('#nav-engagecx, #nav-engagecx a')
   .off('click.engagecx')
@@ -202,24 +183,22 @@ $('#nav-engagecx, #nav-engagecx a')
     }
 
     // create iframe if missing (first visit)
-    if (!hasFrame) {
-      const $iframe = $('<iframe>', {
-        id: 'engagecxFrame',
-        src: nextLoginUrl(), // first load -> login page
-        style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
-        scrolling: 'yes'
-      }).on('load', function () {
-        nudgeIframe();
-        applyExpandState();
-        updateTopScroll();
-        updateRightScroll();
-      });
-
-      $slot.append($iframe);
-      setupTopScroll();
-      setupRightScroll();
+    const $iframe = $('<iframe>', {
+      id: 'engagecxFrame',
+      src: nextLoginUrl(), // first load -> login page
+      style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
+      scrolling: 'yes'
+    }).on('load', function () {
+      nudgeIframe();
       applyExpandState();
-    }
+      updateTopScroll();
+      updateRightScroll();
+    });
+
+    $slot.append($iframe);
+    setupTopScroll();
+    setupRightScroll();
+    applyExpandState();
   });
 
 // Hide persistent root when switching to any other nav
@@ -227,6 +206,7 @@ $(document).off('click.engagecx-hide')
   .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
     $('#engagecx-root').hide();
   });
+
 
 
     // Go to Agents Panel
