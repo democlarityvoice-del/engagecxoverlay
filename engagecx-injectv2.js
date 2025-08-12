@@ -11,52 +11,41 @@
     let $template = $('#nav-music');
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
+  // Top scrollbar helpers
+function updateTopScroll() {
+  const $slot = $('#engagecx-slot');
+  const $track = $('#engagecx-scrolltop .track');
+  if ($slot.length && $track.length) {
+    $track.width($slot[0].scrollWidth || 0);
+  }
+}
+
+function setupTopScroll() {
+  const $slot = $('#engagecx-slot');
+  if (!$slot.length) return;
+
+  let $top = $('#engagecx-scrolltop');
+  if (!$top.length) {
+    $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
+      .css({ height:'14px', overflowX:'auto', overflowY:'hidden', position:'sticky', top:0, zIndex:30, background:'#fafafa' });
+    // insert just below the toolbar, above the iframe
+    $top.insertAfter($('#engagecx-slot').children().first());
+    $slot.append($bar, $iframe);
+    setupTopScroll();
+    updateTopScroll();
+
+
+  }
+
+  let lock = false;
+  $top.off('scroll.sync').on('scroll.sync', function(){ if (lock) return; lock = true; $slot.scrollLeft(this.scrollLeft); lock = false; });
+  $slot.off('scroll.sync').on('scroll.sync', function(){ if (lock) return; lock = true; $top.scrollLeft(this.scrollLeft); lock = false; });
+
+  updateTopScroll();
+}
 
     //-------------------------------------------------------------------------------
-  // keep the cover sized/placed
-const LOGOUT_TOP_PX   = 295;  // distance from iframe top to "Log out" row
-const LOGOUT_RIGHT_PX = 18;   // distance from right edge
-const LOGOUT_WIDTH_PX = 230;  // row width
-const LOGOUT_HEIGHT_PX= 38;   // row height
-
-  function positionLogoutCover() {
-  const $slot  = $('#engagecx-slot');
-  const $cover = $('#engagecx-logout-cover');
-  if (!$slot.length || !$cover.length) return;
-
-  $slot.css({ position: 'relative', overflowX: 'auto' });
-  $cover.css({
-    top:   LOGOUT_TOP_PX + 'px',
-    right: LOGOUT_RIGHT_PX + 'px',
-    width: LOGOUT_WIDTH_PX + 'px',
-    height: LOGOUT_HEIGHT_PX + 'px'
-  });
-}
-
-// create (if needed) + make it invisible but click-blocking, then position it
-function ensureLogoutCover() {
-  let $cover = $('#engagecx-logout-cover');
-  if (!$cover.length) {
-    $cover = $('<div id="engagecx-logout-cover"></div>').appendTo('#engagecx-slot');
-  }
-  $cover
-    .text('').attr('title','')
-    .css({
-      position: 'absolute',
-      zIndex: 50,
-      background: 'transparent',
-      borderRadius: '6px',
-      pointerEvents: 'auto',  // eat clicks so Logout can’t be clicked
-      cursor: 'default',
-      userSelect: 'none'
-    })
-    .off('click mousedown mouseup')
-    .on('click mousedown mouseup', e => { e.preventDefault(); e.stopPropagation(); });
-
-  positionLogoutCover();
-}
-
-
+ 
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
     $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
@@ -117,6 +106,8 @@ function ensureLogoutCover() {
       }
       nudgeIframe();
       $('#engagecx-expand').text(isExpanded ? 'Reset Width' : 'Expand / Scroll Right');
+      updateTopScroll();
+
     }
 
     $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
