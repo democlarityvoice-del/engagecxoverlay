@@ -12,13 +12,6 @@
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
 
-    // Top scrollbar helpers
-    function updateTopScroll() {
-      const $slot = $('#engagecx-slot');
-      const $track = $('#engagecx-scrolltop .track');
-      if ($slot.length && $track.length) {
-        $track.width($slot[0].scrollWidth || 0);
-      }
     }
     // === Top & Right scrollbars (sync with #engagecx-slot) ===
 let _lock = false;
