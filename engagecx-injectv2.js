@@ -33,7 +33,9 @@
             height:'16px', overflowX:'scroll', overflowY:'hidden',
             position:'sticky', top:0, zIndex:30, background:'#fafafa', width:'100%'
           });
-        $top.insertBefore($slot);
+        // place INSIDE the slot, just under the toolbar so it travels with detach/attach
+        const $bar = $slot.children().first();
+        ($bar.length ? $top.insertAfter($bar) : $slot.prepend($top));
         $top.find('.track').css({display:'block', height:'1px'});
       }
       $top.off('scroll.sync').on('scroll.sync', function () {
@@ -135,79 +137,83 @@
       updateRightScroll();
     }
 
-    
-// ---------- EngageCX nav: persist iframe (no re-login) ----------
-// ---------- EngageCX nav: persist iframe (no re-login) ----------
-$('#nav-engagecx, #nav-engagecx a')
-  .off('click.engagecx')
-  .on('click.engagecx', function (e) {
-    e.preventDefault(); e.stopPropagation();
+    // ---------- EngageCX nav: mount inside #content (persist via detach/attach) ----------
+    $('#nav-engagecx, #nav-engagecx a')
+      .off('click.engagecx')
+      .on('click.engagecx', function (e) {
+        e.preventDefault(); e.stopPropagation();
 
-    $('#nav-buttons li').removeClass('nav-link-current');
-    $('#nav-engagecx').addClass('nav-link-current');
-    $('.navigation-title').text('EngageCX');
+        $('#nav-buttons li').removeClass('nav-link-current');
+        $('#nav-engagecx').addClass('nav-link-current');
+        $('.navigation-title').text('EngageCX');
 
-    // root + frame guards
-    let $root = $('#engagecx-root');
-    let hasFrame = $root.length && $root.find('#engagecxFrame').length > 0;
+        // Ensure a hidden cache exists to park the slot when navigating away
+        let $cache = $('#engagecx-cache');
+        if (!$cache.length) {
+          $cache = $('<div id="engagecx-cache" style="position:absolute;left:-99999px;top:-99999px;width:1px;height:1px;overflow:hidden;"></div>').appendTo('body');
+        }
 
-    if (hasFrame) {
-      $root.show();
-      $('#engagecxFrame').show();
-      applyExpandState(); updateTopScroll(); updateRightScroll();
-      return;
-    }
+        const $content = $('#content').empty();
 
-    // ensure root + slot exist
-    if (!$root.length) {
-      $root = $('<div id="engagecx-root" style="position:relative;width:100%;z-index:2147483647;"></div>').appendTo('body');
-    }
-    let $slot = $root.find('#engagecx-slot');
-    if (!$slot.length) $slot = $('<div id="engagecx-slot"></div>').appendTo($root);
+        // If we already built the slot before, bring it back from the cache (no re-login)
+        let $slot = $('#engagecx-slot');
+        if (!$slot.length) $slot = $('#engagecx-cache #engagecx-slot'); // parked
+        if ($slot.length) {
+          $slot.appendTo($content).show();
+          setupTopScroll();    // rewire scroll sync (DOM moved)
+          setupRightScroll();
+          applyExpandState();
+          return;
+        }
 
-    // toolbar (only once)
-    if (!$root.find('#engagecx-expand').length) {
-      const $bar = $(`
-        <div style="display:flex;flex-direction:column;gap:6px;
-             padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
-            <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
-            <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
-              title="Click to refresh session or login/logout.">Refresh / Log out</button>
-            <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
+        // First time: build slot + toolbar + iframe
+        $slot = $('<div id="engagecx-slot"></div>').appendTo($content);
+
+        const $bar = $(`
+          <div style="display:flex;flex-direction:column;gap:6px;
+               padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
+              <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
+              <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
+                title="Click to refresh session or login/logout.">Refresh / Log out</button>
+              <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
+            </div>
           </div>
-        </div>
-      `);
-      $slot.append($bar);
-    }
+        `).appendTo($slot);
 
-    // create iframe if missing (first visit)
-    const $iframe = $('<iframe>', {
-      id: 'engagecxFrame',
-      src: nextLoginUrl(), // first load -> login page
-      style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
-      scrolling: 'yes'
-    }).on('load', function () {
-      nudgeIframe();
-      applyExpandState();
-      updateTopScroll();
-      updateRightScroll();
-    });
+        // Top scrollbar goes INSIDE slot so it persists with detach/attach
+        setupTopScroll();
 
-    $slot.append($iframe);
-    setupTopScroll();
-    setupRightScroll();
-    applyExpandState();
-  });
+        const $iframe = $('<iframe>', {
+          id: 'engagecxFrame',
+          src: nextLoginUrl(), // first load -> login page
+          style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
+          scrolling: 'yes'
+        }).on('load', function () {
+          nudgeIframe();
+          applyExpandState();
+          updateTopScroll();
+          updateRightScroll();
+        });
 
-// Hide persistent root when switching to any other nav
-$(document).off('click.engagecx-hide')
-  .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
-    $('#engagecx-root').hide();
-  });
+        $slot.append($iframe);
+        setupRightScroll();
+        applyExpandState();
+      });
 
-
+    // Park the slot (keep iframe alive) when switching to any other nav
+    $(document).off('click.engagecx-hide')
+      .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
+        const $slot = $('#engagecx-slot');
+        if ($slot.length) {
+          let $cache = $('#engagecx-cache');
+          if (!$cache.length) {
+            $cache = $('<div id="engagecx-cache" style="position:absolute;left:-99999px;top:-99999px;width:1px;height:1px;overflow:hidden;"></div>').appendTo('body');
+          }
+          $slot.appendTo($cache).hide(); // detach without destroying (cookies/session survive)
+        }
+      });
 
     // Go to Agents Panel
     $(document).off('click.engagecx-go-agent')
