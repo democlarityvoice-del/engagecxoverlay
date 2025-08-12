@@ -171,14 +171,16 @@ function setupRightScroll() {
         scrolling: 'yes'
       });
 
-      $iframe.on('load', function () {
+            $iframe.on('load', function () {
         nudgeIframe();
         applyExpandState();
         updateTopScroll();
+        updateRightScroll();
       });
 
       $slot.append($bar, $iframe);
-      setupTopScroll();   // add top scrollbar
+      setupTopScroll();
+      setupRightScroll();
       applyExpandState();
     });
 
@@ -190,6 +192,7 @@ function setupRightScroll() {
       nudgeIframe();
       applyExpandState();
       updateTopScroll();
+      updateRightScroll();
     });
 
     // Go to Control Panel
@@ -200,6 +203,7 @@ function setupRightScroll() {
       nudgeIframe();
       applyExpandState();
       updateTopScroll();
+      updateRightScroll();
     });
 
     // Refresh Session
@@ -217,19 +221,25 @@ function setupRightScroll() {
       nudgeIframe();
       applyExpandState();
       updateTopScroll();
+      updateRightScroll();
     });
 
-    // expand/scroll-right toggle handler
+    // Expand / Reset
     $(document).off('click.engagecx-expand')
     .on('click.engagecx-expand', '#engagecx-expand', function (e) {
       e.preventDefault();
       isExpanded = !isExpanded;
       applyExpandState();
       updateTopScroll();
+      updateRightScroll();
     });
 
-    // keep track width in sync on resize
-    $(window).off('resize.engagecx-topscroll').on('resize.engagecx-topscroll', updateTopScroll);
+    // Keep tracks in sync on resize
+    $(window).off('resize.engagecx-scrolls')
+      .on('resize.engagecx-scrolls', function () {
+        updateTopScroll();
+        updateRightScroll();
+      });
   }
 
   (function waitForJQ() {
