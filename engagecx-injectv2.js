@@ -156,48 +156,78 @@
           return;
         }
 
-        // First time: create persistent root outside main content, keep on top
-        $root = $('<div id="engagecx-root" style="position:relative;width:100%;z-index:2147483647;"></div>').appendTo('body');
+// ---------- EngageCX nav: persist iframe (no re-login) ----------
+$('#nav-engagecx, #nav-engagecx a')
+  .off('click.engagecx')
+  .on('click.engagecx', function (e) {
+    e.preventDefault(); e.stopPropagation();
 
-        // slot + toolbar + iframe (login only once here)
-        const $slot = $('<div id="engagecx-slot"></div>').appendTo($root);
+    $('#nav-buttons li').removeClass('nav-link-current');
+    $('#nav-engagecx').addClass('nav-link-current');
+    $('.navigation-title').text('EngageCX');
 
-        const $bar = $(`
-          <div style="display:flex;flex-direction:column;gap:6px;
-               padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
-              <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
-              <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
-                title="Click to refresh session or login/logout.">Refresh / Log out</button>
-              <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
-            </div>
+    // root + frame guards
+    let $root = $('#engagecx-root');
+    let hasFrame = $root.length && $root.find('#engagecxFrame').length > 0;
+
+    if (hasFrame) {
+      $root.show();
+      $('#engagecxFrame').show();
+      applyExpandState(); updateTopScroll(); updateRightScroll();
+      return;
+    }
+
+    // ensure root + slot exist
+    if (!$root.length) {
+      $root = $('<div id="engagecx-root" style="position:relative;width:100%;z-index:2147483647;"></div>').appendTo('body');
+    }
+    let $slot = $root.find('#engagecx-slot');
+    if (!$slot.length) $slot = $('<div id="engagecx-slot"></div>').appendTo($root);
+
+    // toolbar (only once)
+    if (!$root.find('#engagecx-expand').length) {
+      const $bar = $(`
+        <div style="display:flex;flex-direction:column;gap:6px;
+             padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
+            <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
+            <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
+              title="Click to refresh session or login/logout.">Refresh / Log out</button>
+            <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
           </div>
-        `);
+        </div>
+      `);
+      $slot.append($bar);
+    }
 
-        const $iframe = $('<iframe>', {
-          id: 'engagecxFrame',
-          src: nextLoginUrl(), // login ONLY on first mount
-          style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
-          scrolling: 'yes'
-        }).on('load', function () {
-          nudgeIframe();
-          applyExpandState();
-          updateTopScroll();
-          updateRightScroll();
-        });
-
-        $slot.append($bar, $iframe);
-        setupTopScroll();
-        setupRightScroll();
+    // create iframe if missing (first visit)
+    if (!hasFrame) {
+      const $iframe = $('<iframe>', {
+        id: 'engagecxFrame',
+        src: nextLoginUrl(), // first load -> login page
+        style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
+        scrolling: 'yes'
+      }).on('load', function () {
+        nudgeIframe();
         applyExpandState();
+        updateTopScroll();
+        updateRightScroll();
       });
 
-    // Hide persistent root when switching to any other nav item
-    $(document).off('click.engagecx-hide')
-      .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
-        $('#engagecx-root').hide();
-      });
+      $slot.append($iframe);
+      setupTopScroll();
+      setupRightScroll();
+      applyExpandState();
+    }
+  });
+
+// Hide persistent root when switching to any other nav
+$(document).off('click.engagecx-hide')
+  .on('click.engagecx-hide', '#nav-buttons li:not(#nav-engagecx), #nav-buttons li:not(#nav-engagecx) a', function () {
+    $('#engagecx-root').hide();
+  });
+
 
     // Go to Agents Panel
     $(document).off('click.engagecx-go-agent')
