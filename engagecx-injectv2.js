@@ -138,13 +138,22 @@
       $('#nav-engagecx').addClass('nav-link-current');
       $('.navigation-title').text('EngageCX');
 
-      // If already mounted, just show it (do NOT recreate iframe)
+   // ← ADD THIS LINE HERE
       let $root = $('#engagecx-root');
-      if ($root.length) { $root.show(); return; }
+
+      // If already mounted, just show it (do NOT recreate iframe)
+      if ($root.length) {
+        $root.show();
+        $('#engagecxFrame').css('display','block');  // ensure iframe visible
+        applyExpandState();
+        updateTopScroll();
+        updateRightScroll();
+        return;
+}
+
 
       // First time: create persistent root outside #content
-      $root = $('<div id="engagecx-root" style="position:relative;"></div>').appendTo('body');
-
+      $root = $('<div id="engagecx-root" style="position:relative;width:100%;z-index:999;"></div>').appendTo('body');
       // slot + toolbar + iframe (login only once here)
       const $slot = $('<div id="engagecx-slot"></div>').appendTo($root);
 
