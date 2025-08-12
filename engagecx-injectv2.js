@@ -14,7 +14,12 @@
 
     //-------------------------------------------------------------------------------
   // keep the cover sized/placed
-function positionLogoutCover() {
+const LOGOUT_TOP_PX   = 295;  // distance from iframe top to "Log out" row
+const LOGOUT_RIGHT_PX = 18;   // distance from right edge
+const LOGOUT_WIDTH_PX = 230;  // row width
+const LOGOUT_HEIGHT_PX= 38;   // row height
+
+  function positionLogoutCover() {
   const $slot  = $('#engagecx-slot');
   const $cover = $('#engagecx-logout-cover');
   if (!$slot.length || !$cover.length) return;
