@@ -91,21 +91,21 @@
       if (!$slot.length) $slot = $('<div id="engagecx-slot"></div>').appendTo('#content');
       else $slot.empty();
 
-      const $bar = $(`
-        <div style="display:flex;flex-direction:column;gap:6px;
-             padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
-          <div style="font-size:13px;color:#444;">
-            Click <strong>Refresh Session</strong> anytime to clear the current session and return to the login page.
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
-            <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
-            <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Refresh Session</button>
-            <!-- NEW -->
-            <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
-          </div>
-        </div>
-      `);
+  const $bar = $(`
+    <div style="display:flex;flex-direction:column;gap:6px;
+       padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#fafafa;">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <button id="engagecx-go-agent"  class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Agents Panel</button>
+      <button id="engagecx-go-control" class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Go to Control Panel</button>
+      <button id="engagecx-refresh"   class="btn btn-small" style="padding:6px 10px;cursor:pointer;"
+        title="Clears the current session and returns the iframe to the login page.">
+        Refresh Session
+      </button>
+      <button id="engagecx-expand"    class="btn btn-small" style="padding:6px 10px;cursor:pointer;">Expand / Scroll Right</button>
+    </div>
+  </div>
+`);
+
 
       const $iframe = $('<iframe>', {
         id: 'engagecxFrame',
