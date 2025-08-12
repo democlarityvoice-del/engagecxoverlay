@@ -1,4 +1,5 @@
-// ===== EngageCX bootstrap (waits for jQuery + nav) =====
+<!-- EngageCX bootstrap -->
+<script>
 ;(function () {
   function when(pred, fn) {
     if (pred()) return void fn();
@@ -141,18 +142,11 @@
         $('.navigation-title').text('EngageCX');
 
         let $root = $('#engagecx-root');
+
+        // If already created, just show and bail (no new iframe, no new login)
         if ($root.length) {
           $root.show();
-          const $f = $('#engagecxFrame');
-          if ($f.length) {
-            // soft refresh the current route so data/ws wake up (no re-login)
-            const cur = $f.attr('src') || '';
-            if (cur.includes('#/agentConsole')) {
-              $f.attr('src', targetUrl + '&poke=' + Date.now());
-            } else if (cur.includes('#/admin/widget')) {
-              $f.attr('src', controlUrl + '&poke=' + Date.now());
-            }
-          }
+          $('#engagecxFrame').show();
           applyExpandState();
           return;
         }
@@ -180,7 +174,7 @@
 
         const $iframe = $('<iframe>', {
           id: 'engagecxFrame',
-          src: targetUrl, // let cookie drive: login if needed, else straight in
+          src: targetUrl, // cookie decides: login page if needed, else agent panel
           style: 'border:none; width:100%; height:calc(100vh - 240px); min-height:800px; overflow:auto;',
           scrolling: 'yes'
         }).on('load', function () {
@@ -243,3 +237,4 @@
     when(() => jq('#nav-buttons').length && (jq('#nav-music').length || jq('#nav-buttons').children('li').length), start);
   })();
 })();
+</script>
