@@ -24,24 +24,42 @@
 let _lock = false;
 
 function updateTopScroll() {
-  const $slot = $('#engagecx-slot'), $track = $('#engagecx-scrolltop .track');
-  if ($slot.length && $track.length) $track.width($slot[0].scrollWidth || 0);
+  const $slot  = $('#engagecx-slot');
+  const $track = $('#engagecx-scrolltop .track');
+  if ($slot.length && $track.length) {
+    $track.width($slot[0].scrollWidth || 0);
+  }
 }
+
 function setupTopScroll() {
   const $slot = $('#engagecx-slot'); if (!$slot.length) return;
+
   let $top = $('#engagecx-scrolltop');
   if (!$top.length) {
     $top = $('<div id="engagecx-scrolltop"><div class="track"></div></div>')
-      .css({height:'16px',overflowX:'auto',overflowY:'hidden',position:'sticky',top:0,zIndex:30,background:'#fafafa',width:'100%'});
-    const $first = $slot.children().first(); ($first.length ? $top.insertAfter($first) : $slot.prepend($top));
-    $top.find('.track').css({display:'block',height:'1px'});
+      .css({
+        height:'16px',
+        overflowX:'scroll',      // force a visible scrollbar
+        overflowY:'hidden',
+        position:'sticky',
+        top:0,
+        zIndex:30,
+        background:'#fafafa',
+        width:'100%'
+      });
+    // place BEFORE the slot (sibling)
+    $top.insertBefore($slot);
+    $top.find('.track').css({ display:'block', height:'1px' });
   }
+
+  let lock = false;
   $top.off('scroll.sync').on('scroll.sync', function(){
-    if (_lock) return; _lock = true; $slot.scrollLeft(this.scrollLeft); _lock = false;
+    if (lock) return; lock = true; $slot.scrollLeft(this.scrollLeft); lock = false;
   });
   $slot.off('scroll.syncTop').on('scroll.syncTop', function(){
-    if (_lock) return; _lock = true; $top.scrollLeft(this.scrollLeft); _lock = false;
+    if (lock) return; lock = true; $top.scrollLeft($slot.scrollLeft()); lock = false;
   });
+
   updateTopScroll();
 }
 
