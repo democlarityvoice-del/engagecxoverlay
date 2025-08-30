@@ -90,8 +90,9 @@
     if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
 
     function nextLoginUrl() {
-      return 'https://engagecx.clarityvoice.com/#/login?t=' + Date.now() + '&r=' + Math.random().toString(36).slice(2);
-    }
+  return 'https://engagecx.clarityvoice.com/?autoLogon=true&userId=05c850f8-3107-4acd-beb5-ba673389a3c4&topLayout=false&navigationStyle=TopLeft';
+}
+
     const targetUrl  = 'https://engagecx.clarityvoice.com/#/agentConsole/message?includeWs=true&isTicket=true&topLayout=true';
     const controlUrl = 'https://engagecx.clarityvoice.com/#/admin/widget/dashboard?noLayout=false';
 
