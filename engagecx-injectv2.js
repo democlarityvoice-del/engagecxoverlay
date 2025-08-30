@@ -246,20 +246,20 @@
     // Prevent duplicate insertion
     if ($menu.find('li.engagecx-menu').length) return;
 
-    // Build submenu
-    const $submenu = $(`
-      <ul class="dropdown-submenu" style="display:none; position:absolute; left:100%; top:0; margin-top:-2px; background:#fff; border:1px solid #ccc; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index:1000; min-width:180px;">
-        <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
-        <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
-      </ul>
-    `);
+    // Build submenu (VERTICAL, styled like default dropdown)
+const $submenu = $(`
+  <ul class="dropdown-menu" style="margin-left: 0; border-top: none;">
+    <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
+    <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
+  </ul>
+`);
 
-    // Build main menu item with submenu
-    const $main = $(`
-      <li class="engagecx-menu" style="position:relative;">
-        <a href="#" id="engagecx-main-link">EngageCX ▸</a>
-      </li>
-    `).append($submenu);
+// Build main menu item with submenu (styled like others)
+const $main = $(`
+  <li class="engagecx-menu dropdown-submenu">
+    <a href="#">EngageCX</a>
+  </li>
+`).append($submenu);
 
     // Insert before SMARTanalytics or append to end
     const $smart = $menu.find('a:contains("SMARTanalytics")').closest('li');
