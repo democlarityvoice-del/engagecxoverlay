@@ -229,7 +229,7 @@
   })();
 })();
 
-// ===== Append EngageCX to Apps dropdown (without touching nav button logic) =====
+// ===== Append EngageCX with submenu to Apps dropdown (safe, styled) =====
 (function () {
   function whenAppListReady(pred, fn) {
     if (pred()) return fn();
@@ -240,24 +240,49 @@
 
   whenAppListReady(() => {
     const $ = window.jQuery;
-    return $('#app-menu-list').length && $('#app-menu-list li').length > 0;
-  }, () => {
-    const $ = window.jQuery;
     const $menu = $('#app-menu-list');
     if (!$menu.length) return;
 
-    // Check if EngageCX is already there
-    if ($menu.find('a:contains("EngageCX")').length) return;
+    // Prevent duplicate insertion
+    if ($menu.find('li.engagecx-menu').length) return;
 
-    // Create new EngageCX link item
-    const $newItem = $('<li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX</a></li>');
+    // Build submenu
+    const $submenu = $(`
+      <ul class="dropdown-submenu" style="display:none; position:absolute; left:100%; top:0; margin-top:-2px; background:#fff; border:1px solid #ccc; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index:1000; min-width:180px;">
+        <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
+        <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
+      </ul>
+    `);
 
-    // Insert just before SMARTanalytics, fallback to end
+    // Build main menu item with submenu
+    const $main = $(`
+      <li class="engagecx-menu" style="position:relative;">
+        <a href="#" id="engagecx-main-link">EngageCX ▸</a>
+      </li>
+    `).append($submenu);
+
+    // Insert before SMARTanalytics or append to end
     const $smart = $menu.find('a:contains("SMARTanalytics")').closest('li');
     if ($smart.length) {
-      $newItem.insertBefore($smart);
+      $main.insertBefore($smart);
     } else {
-      $menu.append($newItem);
+      $menu.append($main);
     }
+
+    // Show/hide submenu on hover
+    $main.hover(
+      () => $submenu.stop(true, true).slideDown(150),
+      () => $submenu.stop(true, true).slideUp(150)
+    );
+
+    // Handle View in Portal (simulate nav click)
+    $(document).off('click.engagecx-launch')
+    .on('click.engagecx-launch', '#engagecx-launch-portal', function (e) {
+      e.preventDefault();
+      const $navBtn = $('#nav-engagecx');
+      if ($navBtn.length) $navBtn.find('a').trigger('click');
+    });
   });
+})();
+
 })();
