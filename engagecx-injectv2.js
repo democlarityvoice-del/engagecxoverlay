@@ -241,59 +241,43 @@
   whenAppListReady(() => {
     const $ = window.jQuery;
     const $menu = $('#app-menu-list');
-    if (!$menu.length) return;
+    if (!$menu.length || $menu.find('li.engagecx-menu').length) return;
 
-    // Prevent duplicate insertion
-    if ($menu.find('li.engagecx-menu').length) return;
+    // Build EngageCX dropdown with flyout
+    const $engagecxMenuItem = $(`
+      <li class="dropdown-submenu engagecx-menu">
+        <a tabindex="-1" href="#">EngageCX</a>
+        <ul class="dropdown-menu" style="top: 0; left: 100%; margin-top: 0; margin-left: 0; display: none;">
+          <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
+          <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
+        </ul>
+      </li>
+    `);
 
-    // Step 1: Add the top-level EngageCX menu item
-const $engagecxMenuItem = $(`
-  <li class="dropdown-submenu">
-    <a tabindex="-1" href="#">EngageCX</a>
-    <ul class="dropdown-menu" style="top: 0; left: 100%; margin-top: 0; margin-left: 0; display: none;">
-      <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
-      <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
-    </ul>
-  </li>
-`);
-
-// Step 2: Append it between WebPhone and SMARTanalytics
-const $appsMenu = $('.app-menu-list');
-$appsMenu.find('li:contains("Clarity Video Anywhere")').next().before($engagecxMenuItem);
-
-// Step 3: Handle hover behavior for side-flyout
-$engagecxMenuItem.hover(
-  function () {
-    $(this).find('.dropdown-menu').first().stop(true, true).fadeIn(150);
-  },
-  function () {
-    $(this).find('.dropdown-menu').first().stop(true, true).fadeOut(150);
-  }
-);
-
-
-    // Insert before SMARTanalytics or append to end
+    // Insert EngageCX item between Clarity Video Anywhere and SMARTanalytics
+    const $videoAnywhere = $menu.find('a:contains("Clarity Video Anywhere")').closest('li');
     const $smart = $menu.find('a:contains("SMARTanalytics")').closest('li');
-    if ($smart.length) {
-      $main.insertBefore($smart);
+    if ($videoAnywhere.length && $smart.length) {
+      $smart.before($engagecxMenuItem);
     } else {
-      $menu.append($main);
+      $menu.append($engagecxMenuItem);
     }
 
-    // Show/hide submenu on hover
-    $main.hover(
-      () => $submenu.stop(true, true).slideDown(150),
-      () => $submenu.stop(true, true).slideUp(150)
+    // Hover behavior for flyout
+    $engagecxMenuItem.hover(
+      function () {
+        $(this).find('.dropdown-menu').first().stop(true, true).fadeIn(150);
+      },
+      function () {
+        $(this).find('.dropdown-menu').first().stop(true, true).fadeOut(150);
+      }
     );
 
-    // Handle View in Portal (simulate nav click)
-    $(document).off('click.engagecx-launch')
-    .on('click.engagecx-launch', '#engagecx-launch-portal', function (e) {
+    // View in Portal click: simulate EngageCX nav click
+    $(document).off('click.engagecx-launch').on('click.engagecx-launch', '#engagecx-launch-portal', function (e) {
       e.preventDefault();
       const $navBtn = $('#nav-engagecx');
       if ($navBtn.length) $navBtn.find('a').trigger('click');
     });
   });
 })();
-
-
