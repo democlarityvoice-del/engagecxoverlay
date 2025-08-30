@@ -246,13 +246,15 @@
     // Prevent duplicate insertion
     if ($menu.find('li.engagecx-menu').length) return;
 
-    // Build submenu (VERTICAL, styled like default dropdown)
+    
+// Properly offset EngageCX submenu so it stacks below
 const $submenu = $(`
-  <ul class="dropdown-menu" style="margin-left: 0; border-top: none;">
+  <ul class="dropdown-menu" style="margin-left: 0; margin-top: -2px; border-top: none;">
     <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
     <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
   </ul>
 `);
+
 
 // Build main menu item with submenu (styled like others)
 const $main = $(`
