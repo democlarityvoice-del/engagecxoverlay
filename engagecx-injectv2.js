@@ -246,22 +246,31 @@
     // Prevent duplicate insertion
     if ($menu.find('li.engagecx-menu').length) return;
 
-    
-// Properly offset EngageCX submenu so it stacks below
-const $submenu = $(`
-  <ul class="dropdown-menu" style="margin-left: 0; margin-top: -2px; border-top: none;">
-    <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
-    <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
-  </ul>
+    // Step 1: Add the top-level EngageCX menu item
+const $engagecxMenuItem = $(`
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="#">EngageCX</a>
+    <ul class="dropdown-menu" style="top: 0; left: 100%; margin-top: 0; margin-left: 0; display: none;">
+      <li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX Window</a></li>
+      <li><a href="#" id="engagecx-launch-portal">View in Portal</a></li>
+    </ul>
+  </li>
 `);
 
+// Step 2: Append it between WebPhone and SMARTanalytics
+const $appsMenu = $('.app-menu-list');
+$appsMenu.find('li:contains("Clarity Video Anywhere")').next().before($engagecxMenuItem);
 
-// Build main menu item with submenu (styled like others)
-const $main = $(`
-  <li class="engagecx-menu dropdown-submenu">
-    <a href="#">EngageCX</a>
-  </li>
-`).append($submenu);
+// Step 3: Handle hover behavior for side-flyout
+$engagecxMenuItem.hover(
+  function () {
+    $(this).find('.dropdown-menu').first().stop(true, true).fadeIn(150);
+  },
+  function () {
+    $(this).find('.dropdown-menu').first().stop(true, true).fadeOut(150);
+  }
+);
+
 
     // Insert before SMARTanalytics or append to end
     const $smart = $menu.find('a:contains("SMARTanalytics")').closest('li');
