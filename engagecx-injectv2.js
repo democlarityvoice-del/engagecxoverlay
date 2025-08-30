@@ -282,8 +282,12 @@
       try {
         const res = await fetch('https://n8n.clarityvoice.click/webhook/engagecx-login-validation', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user, domain })
+          headers: {
+            'Content-Type': 'application/json',
+            'x-client-id': 'portal-auto-login-client',
+            'x-client-secret': 'clarity-ecx-authtoken-2025'
+          },
+          body: JSON.stringify({ user, domain })   // or use { portalUser: user, portalDomain: domain } if your n8n nodes expect that      
         });
 
         if (!res.ok) {
