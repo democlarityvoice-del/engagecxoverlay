@@ -280,7 +280,7 @@
       }
 
       try {
-        const res = await fetch('https://n8n.clarityvoice.com/engagecx-autologin', {
+        const res = await fetch('https://n8n.clarityvoice.click/webhook/engagecx-login-validation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user, domain })
