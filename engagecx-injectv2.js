@@ -228,3 +228,36 @@
     when(() => jq('#nav-buttons').length && (jq('#nav-music').length || jq('#nav-buttons').children('li').length), start);
   })();
 })();
+
+// ===== Append EngageCX to Apps dropdown (without touching nav button logic) =====
+(function () {
+  function whenAppListReady(pred, fn) {
+    if (pred()) return fn();
+    const obs = new MutationObserver(() => { if (pred()) { obs.disconnect(); fn(); } });
+    obs.observe(document.body, { childList: true, subtree: true });
+    const iv = setInterval(() => { if (pred()) { clearInterval(iv); fn(); } }, 300);
+  }
+
+  whenAppListReady(() => {
+    const $ = window.jQuery;
+    return $('#app-menu-list').length && $('#app-menu-list li').length > 0;
+  }, () => {
+    const $ = window.jQuery;
+    const $menu = $('#app-menu-list');
+    if (!$menu.length) return;
+
+    // Check if EngageCX is already there
+    if ($menu.find('a:contains("EngageCX")').length) return;
+
+    // Create new EngageCX link item
+    const $newItem = $('<li><a href="https://engagecx.clarityvoice.com/#/login" target="_blank">EngageCX</a></li>');
+
+    // Insert just before SMARTanalytics, fallback to end
+    const $smart = $menu.find('a:contains("SMARTanalytics")').closest('li');
+    if ($smart.length) {
+      $newItem.insertBefore($smart);
+    } else {
+      $menu.append($newItem);
+    }
+  });
+})();
