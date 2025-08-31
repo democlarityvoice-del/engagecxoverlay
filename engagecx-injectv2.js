@@ -25,7 +25,6 @@
     `clipboard-write ${ECX_ORIGIN}`,
     `autoplay ${ECX_ORIGIN}`,
     `encrypted-media ${ECX_ORIGIN}`,
-    `fullscreen ${ECX_ORIGIN}`,
     `picture-in-picture ${ECX_ORIGIN}`,
     `screen-wake-lock ${ECX_ORIGIN}`,
     `display-capture ${ECX_ORIGIN}`
