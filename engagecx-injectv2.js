@@ -14,19 +14,38 @@
   const ECX_CONTROL = 'https://engagecx.clarityvoice.com/#/admin/omni/dashboard?topLayout=false';
   const ECX_AGENT   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=TopLeft';
 
+  // iframe permissions we want to grant
+  const ECX_IFRAME_ALLOW = [
+    'camera',
+    'microphone',
+    'clipboard-write',
+    'autoplay',
+    'encrypted-media',
+    'fullscreen',
+    'picture-in-picture',
+    'screen-wake-lock'
+  ].join('; ');
+
   // ---------- state ----------
   let ecxBooted = false;     // we only build the page after "View in portal"
   let ecxFrame  = null;      // persistent iframe element
 
-  // ---------- styles (Inventory-style tabs) ----------
+  // ---------- styles (Inventory-style tabs; active tab = black text) ----------
   function injectCssOnce() {
     if (document.getElementById('ecx-css')) return;
     const css = `
       #engagecx-wrap{background:#fff}
-      .ecx-tabs{display:flex;gap:18px;margin:0;padding:12px 12px 0;border-bottom:1px solid #d1d5db;background:#f7f7f7}
-      .ecx-tabs a{color:#0a63c1;text-decoration:none;padding:7px 12px;display:inline-block;border:1px solid transparent;border-bottom:0;border-top-left-radius:4px;border-top-right-radius:4px}
-      .ecx-tabs a:hover{text-decoration:underline}
-      .ecx-tabs a.active{background:#fff;border-color:#d1d5db #d1d5db #fff;font-weight:600;text-decoration:none}
+      /* Tabs bar styled like Inventory; namespaced to #ecx-tabs */
+      #ecx-tabs{display:flex;gap:18px;margin:0;padding:12px 12px 0;border-bottom:1px solid #d1d5db;background:#f7f7f7}
+      #ecx-tabs a{
+        color:#1372cc; text-decoration:none; padding:7px 12px; display:inline-block;
+        border:1px solid transparent; border-bottom:0; border-radius:6px 6px 0 0;
+        margin-right:12px;
+      }
+      #ecx-tabs a:hover{text-decoration:underline}
+      #ecx-tabs a.active{
+        color:#000; background:#fff; border-color:#d1d5db #d1d5db #fff; font-weight:600; text-decoration:none
+      }
       #engagecx-slot{position:relative;overflow:auto}
       #engagecxFrame{border:none;width:100%;height:calc(100vh - 240px);min-height:800px}
     `;
@@ -48,9 +67,9 @@
     if (!$wrap.length) {
       $wrap = $(`
         <div id="engagecx-wrap">
-          <div class="ecx-tabs">
-            <a href="#" data-tab="control" class="active">Control Panel</a>
-            <a href="#" data-tab="agent">Agents Panel</a>
+          <div id="ecx-tabs" class="ecx-tabs">
+            <a href="#" id="ecx-tab-control" data-tab="control" class="active">Control Panel</a>
+            <a href="#" id="ecx-tab-agent"   data-tab="agent">Agents Panel</a>
           </div>
           <div id="engagecx-slot"></div>
         </div>
@@ -65,19 +84,22 @@
     if (!ecxFrame) {
       ecxFrame = document.createElement('iframe');
       ecxFrame.id = 'engagecxFrame';
+      ecxFrame.title = 'EngageCX';
       ecxFrame.src = ECX_CONTROL; // default tab
+      ecxFrame.setAttribute('allow', ECX_IFRAME_ALLOW);
+      ecxFrame.setAttribute('allowfullscreen', ''); // for Safari/legacy behavior
       $slot[0].appendChild(ecxFrame);
     } else if (!$.contains($slot[0], ecxFrame)) {
       $slot[0].appendChild(ecxFrame);
     }
 
-    // tab behavior
+    // tab behavior (toggle active class + swap src)
     $(document)
       .off('click.ecxTabs')
-      .on('click.ecxTabs', '.ecx-tabs a', function (e) {
+      .on('click.ecxTabs', '#ecx-tabs a', function (e) {
         e.preventDefault();
         const tab = $(this).data('tab');
-        $('.ecx-tabs a').removeClass('active');
+        $('#ecx-tabs a').removeClass('active');
         $(this).addClass('active');
         ecxFrame.src = (tab === 'agent') ? ECX_AGENT : ECX_CONTROL;
       });
@@ -158,4 +180,3 @@
   // ---------- boot once Apps menu exists (no auto page render) ----------
   when(() => jq() && jq()('#app-menu-list').length, injectAppsMenu);
 })();
-
