@@ -180,9 +180,11 @@ function startNavKeeper() {
 
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
+    $new.attr('style', 'display:list-item'); // ✅ ← add this line
     $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
     $new.find('.nav-text').text('EngageCX');
     $new.find('.nav-bg-image').removeAttr('style'); // keep it plain
+
 
     const $after = $('#nav-callhistory');
     if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
