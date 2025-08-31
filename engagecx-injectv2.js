@@ -96,6 +96,9 @@ function stopNavWatcher() {
       #engagecx-slot{position:relative;overflow:auto}
       #engagecxFrame{border:none;width:100%;height:calc(100vh - 240px);min-height:800px}
     `;
+
+    #nav-engagecx{ display:list-item !important; } /* keep visible even if portal toggles display */
+
     const s = document.createElement('style');
     s.id = 'ecx-css';
     s.textContent = css;
@@ -229,6 +232,22 @@ function stopNavWatcher() {
   // switch to our page
   $('#nav-engagecx').find('a').trigger('click');
 });
+
+let navKeeper = null;
+function startNavKeeper() {
+  if (navKeeper) return;
+  navKeeper = setInterval(() => {
+    if (!ecxNavPinned) return;
+    const nav = document.querySelector('#nav-buttons');
+    if (nav && !document.getElementById('nav-engagecx')) {
+      ensureNavButton(); // re-insert if portal nuked it
+    }
+  }, 750); // mild cadence to avoid thrash
+}
+function stopNavKeeper() {
+  if (navKeeper) { clearInterval(navKeeper); navKeeper = null; }
+}
+
 
   }
 
