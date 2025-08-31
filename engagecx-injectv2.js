@@ -14,11 +14,11 @@
   const ECX_CONTROL = 'https://engagecx.clarityvoice.com/#/admin/omni/dashboard?topLayout=false';
   const ECX_AGENT   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=TopLeft';
 
+  let ecxNavPinned = false;  // once user chooses View in portal, keep ECX in nav
+  let navObserver  = null;   // MutationObserver for nav rebuilds
 
-  // add near the other constants
+
   const ECX_ORIGIN = 'https://engagecx.clarityvoice.com';
-
-// replace ECX_IFRAME_ALLOW with this:
   const ECX_IFRAME_ALLOW = [
     `camera ${ECX_ORIGIN}`,
     `microphone ${ECX_ORIGIN}`,
@@ -28,12 +28,54 @@
     `fullscreen ${ECX_ORIGIN}`,
     `picture-in-picture ${ECX_ORIGIN}`,
     `screen-wake-lock ${ECX_ORIGIN}`,
-    `display-capture ${ECX_ORIGIN}` // for screen share prompts, harmless otherwise
+    `display-capture ${ECX_ORIGIN}`
   ].join('; ');
 
   // ---------- state ----------
-  let ecxBooted = false;     // we only build the page after "View in portal"
-  let ecxFrame  = null;      // persistent iframe element
+  let ecxBooted = false;     // <— missing before
+  let ecxFrame  = null;      // <— missing before
+  let ecxParkEl = null;      // hidden parking spot for the iframe
+
+  function ensureEcxPark() {
+    if (!ecxParkEl) {
+      ecxParkEl = document.createElement('div');
+      ecxParkEl.id = 'ecx-park';
+      ecxParkEl.style.display = 'none';
+      document.body.appendChild(ecxParkEl);
+    }
+  }
+  function parkEcxIframe() {                // move (don’t clone) the iframe out of #content
+    if (ecxFrame && ecxFrame.parentNode) {
+      ensureEcxPark();
+      ecxParkEl.appendChild(ecxFrame);
+    }
+  }
+  function unparkEcxIframe(targetEl) {      // move it back when we show EngageCX again
+    if (ecxFrame && targetEl && ecxFrame.parentNode !== targetEl) {
+      targetEl.appendChild(ecxFrame);
+    }
+  }
+
+  // --- keep EngageCX nav button present across nav rebuilds ---
+function startNavWatcher() {
+  if (navObserver) return; // only one
+  navObserver = new MutationObserver(() => {
+    if (!ecxNavPinned) return;
+    const nav = document.querySelector('#nav-buttons');
+    if (nav && !document.getElementById('nav-engagecx')) {
+      // nav got rebuilt and our item disappeared → re-add it
+      ensureNavButton();
+    }
+  });
+  // portal may replace large chunks; watch broadly
+  navObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+function stopNavWatcher() {
+  navObserver?.disconnect();
+  navObserver = null;
+}
+
 
   // ---------- styles (Inventory-style tabs; active tab = black text) ----------
   function injectCssOnce() {
@@ -85,18 +127,20 @@
     }
 
     // persistent iframe
-    let $slot = $('#engagecx-slot');
+    const $slot = $('#engagecx-slot');
     if (!ecxFrame) {
       ecxFrame = document.createElement('iframe');
       ecxFrame.id = 'engagecxFrame';
       ecxFrame.title = 'EngageCX';
       ecxFrame.src = ECX_CONTROL; // default tab
       ecxFrame.setAttribute('allow', ECX_IFRAME_ALLOW);
-      ecxFrame.setAttribute('allowfullscreen', ''); // for Safari/legacy behavior
+      ecxFrame.setAttribute('allowfullscreen', '');
       $slot[0].appendChild(ecxFrame);
-    } else if (!$.contains($slot[0], ecxFrame)) {
-      $slot[0].appendChild(ecxFrame);
+    } else {
+      unparkEcxIframe($slot[0]); // move the existing one back in
     }
+
+
 
     // tab behavior (toggle active class + swap src)
     $(document)
@@ -107,6 +151,9 @@
         $('#ecx-tabs a').removeClass('active');
         $(this).addClass('active');
         ecxFrame.src = (tab === 'agent') ? ECX_AGENT : ECX_CONTROL;
+
+        // (optional) help device prompts by focusing the frame
+        setTimeout(()=>{ try { ecxFrame.contentWindow?.focus(); } catch {} }, 50);
       });
   }
 
@@ -175,12 +222,23 @@
 
     // View in portal → create nav + show tabs page (no SSO)
     $(document).off('click.ecxViewPortal').on('click.ecxViewPortal', '#engagecx-view-portal', function (e) {
-      e.preventDefault();
-      if (!ecxBooted) { ensureNavButton(); ecxBooted = true; }
-      // switch to our page
-      $('#nav-engagecx').find('a').trigger('click');
-    });
+  e.preventDefault();
+  ecxNavPinned = true;       // mark as pinned so the watcher keeps it around
+  ensureNavButton();         // add it now (if missing)
+  startNavWatcher();         // keep it present through future nav rebuilds
+  // switch to our page
+  $('#nav-engagecx').find('a').trigger('click');
+});
+
   }
+
+  // Park iframe before portal navigates away via other left-nav items
+  document.addEventListener('click', function(ev){
+    const a = ev.target.closest && ev.target.closest('#nav-buttons a');
+    if (a && !a.closest('#nav-engagecx')) {
+      parkEcxIframe(); // <— fixed name
+    }
+  }, true); // capture phase so we run before the portal handler
 
   // ---------- boot once Apps menu exists (no auto page render) ----------
   when(() => jq() && jq()('#app-menu-list').length, injectAppsMenu);
