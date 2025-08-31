@@ -76,6 +76,18 @@ function stopNavWatcher() {
   navObserver = null;
 }
 
+let navKeeper = null;
+
+function startNavKeeper() {
+  if (navKeeper) return;
+  navKeeper = setInterval(() => {
+    if (!ecxNavPinned) return;
+    const nav = document.querySelector('#nav-buttons');
+    if (nav && !document.getElementById('nav-engagecx')) {
+      ensureNavButton(); // <- re-add it if the portal nuked it
+    }
+  }, 750); // mild cadence to avoid thrash
+}
 
   // ---------- styles (Inventory-style tabs; active tab = black text) ----------
   function injectCssOnce() {
@@ -197,8 +209,8 @@ function stopNavWatcher() {
       <li class="dropdown-submenu engagecx-menu" id="engagecx-submenu">
         <a tabindex="-1" href="#">EngageCX</a>
         <ul class="dropdown-menu" style="top:0;left:100%;margin-top:0;margin-left:0;display:none;">
-          <li><a href="#" id="engagecx-open-window" target="_blank" rel="noopener noreferrer">Open in window</a></li>
-          <li><a href="#" id="engagecx-view-portal">View in portal</a></li>
+          <li><a href="#" id="engagecx-open-window" target="_blank" rel="noopener noreferrer">Open in Window</a></li>
+          <li><a href="#" id="engagecx-view-portal">View in Portal</a></li>
         </ul>
       </li>
     `);
@@ -222,13 +234,13 @@ function stopNavWatcher() {
 
     // View in portal → create nav + show tabs page (no SSO)
     $(document).off('click.ecxViewPortal').on('click.ecxViewPortal', '#engagecx-view-portal', function (e) {
-  e.preventDefault();
-  ecxNavPinned = true;       // mark as pinned so the watcher keeps it around
-  ensureNavButton();         // add it now (if missing)
-  startNavWatcher();         // keep it present through future nav rebuilds
-  // switch to our page
-  $('#nav-engagecx').find('a').trigger('click');
-});
+      e.preventDefault();
+      ecxNavPinned = true;       // mark as pinned so the watcher keeps it around
+     ensureNavButton();         // add it now (if missing)
+     startNavWatcher();         // keep it present through future nav rebuilds
+     startNavKeeper();          // << THIS is what was missing
+     $('#nav-engagecx').find('a').trigger('click');
+    });
 
   }
 
