@@ -79,31 +79,31 @@ function stopNavWatcher() {
 
   // ---------- styles (Inventory-style tabs; active tab = black text) ----------
   function injectCssOnce() {
-    if (document.getElementById('ecx-css')) return;
-    const css = `
-      #engagecx-wrap{background:#fff}
-      /* Tabs bar styled like Inventory; namespaced to #ecx-tabs */
-      #ecx-tabs{display:flex;gap:18px;margin:0;padding:12px 12px 0;border-bottom:1px solid #d1d5db;background:#f7f7f7}
-      #ecx-tabs a{
-        color:#1372cc; text-decoration:none; padding:7px 12px; display:inline-block;
-        border:1px solid transparent; border-bottom:0; border-radius:6px 6px 0 0;
-        margin-right:12px;
-      }
-      #ecx-tabs a:hover{text-decoration:underline}
-      #ecx-tabs a.active{
-        color:#000; background:#fff; border-color:#d1d5db #d1d5db #fff; font-weight:600; text-decoration:none
-      }
-      #engagecx-slot{position:relative;overflow:auto}
-      #engagecxFrame{border:none;width:100%;height:calc(100vh - 240px);min-height:800px}
-    `;
+  if (document.getElementById('ecx-css')) return;
+  const css = `
+    #engagecx-wrap{background:#fff}
+    /* Tabs bar styled like Inventory; namespaced to #ecx-tabs */
+    #ecx-tabs{display:flex;gap:18px;margin:0;padding:12px 12px 0;border-bottom:1px solid #d1d5db;background:#f7f7f7}
+    #ecx-tabs a{
+      color:#1372cc; text-decoration:none; padding:7px 12px; display:inline-block;
+      border:1px solid transparent; border-bottom:0; border-radius:6px 6px 0 0;
+      margin-right:12px;
+    }
+    #ecx-tabs a:hover{text-decoration:underline}
+    #ecx-tabs a.active{
+      color:#000; background:#fff; border-color:#d1d5db #d1d5db #fff; font-weight:600; text-decoration:none
+    }
+    #engagecx-slot{position:relative;overflow:auto}
+    #engagecxFrame{border:none;width:100%;height:calc(100vh - 240px);min-height:800px}
 
-    #nav-engagecx{ display:list-item !important; } /* keep visible even if portal toggles display */
-
-    const s = document.createElement('style');
-    s.id = 'ecx-css';
-    s.textContent = css;
-    document.head.appendChild(s);
-  }
+    /* <<< add THIS inside the string >>> */
+    #nav-engagecx{ display:list-item !important; }  /* keep visible even if portal toggles display */
+  `;
+  const s = document.createElement('style');
+  s.id = 'ecx-css';
+  s.textContent = css;
+  document.head.appendChild(s);
+}
 
   // ---------- build the EngageCX page (only when requested) ----------
   function buildEcxPage() {
