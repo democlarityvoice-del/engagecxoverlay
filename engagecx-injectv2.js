@@ -181,13 +181,23 @@ function startNavKeeper() {
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
 
-    const $new = $template.clone();
-    $new.attr('id', 'nav-engagecx');
-    $new.attr('style', 'display:list-item');           // ← force proper layout
-    $new.addClass('engagecx-persist');                 // ← optional, for future styling control
-    $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
-    $new.find('.nav-text').text('EngageCX');
-    $new.find('.nav-bg-image').removeAttr('style'); // keep it plain
+    const $icon = $new.find('.nav-bg-image');
+    $icon.removeAttr('class');
+    $icon.attr('style', `
+      width: 22px;
+      height: 22px;
+      -webkit-mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/refs/heads/main/message-regular-full.svg');
+      mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/refs/heads/main/message-regular-full.svg');
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      background-color: rgba(255, 255, 255, 0.95);
+      display: inline-block;
+    `);
+
 
 
     const $after = $('#nav-callhistory');
