@@ -320,42 +320,49 @@
     });
 
     // View in portal: handshake with n8n → inject nav → autologin iframe
-    $(document).off('click.ecxViewPortal').on('click.ecxViewPortal', '#engagecx-view-portal', async function (e) {
-      e.preventDefault();
-      const $ = jq();
+    // View in portal: handshake with n8n → inject nav → autologin iframe
+$(document).off('click.ecxViewPortal').on('click.ecxViewPortal', '#engagecx-view-portal', async function (e) {
+  e.preventDefault();
 
-      const { user, domain } = getPortalIdentity($);
-      if (!user || !domain) {
-        alert('Unable to determine your portal user or domain. Please refresh and try again.');
-        return;
-      }
+  const { user, domain } = getPortalIdentity(jQuery);
+  if (!user || !domain) {
+    alert('Unable to determine your portal user or domain. Please refresh and try again.');
+    return;
+  }
 
-      try {
-        const res = await fetch('https://n8n.clarityvoice.click/webhook/engagecx-login-validation', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-client-id': 'portal-auto-login-client',
-            'x-client-secret': 'clarity-ecx-authtoken-2025'
-          },
-          body: JSON.stringify({ user, domain })   // or use { portalUser: user, portalDomain: domain } if your n8n nodes expect that      
-        });
+  let data;
+  try {
+    const res = await fetch('https://n8n.clarityvoice.click/webhook/engagecx-login-validation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-client-id': 'portal-auto-login-client',
+        'x-client-secret': 'clarity-ecx-authtoken-2025'
+      },
+      body: JSON.stringify({ user, domain })  // if your n8n expects portalUser/portalDomain, rename here
+    });
+    data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || ('HTTP ' + res.status));
+    }
+  } catch (err) {
+    console.error('[EngageCX] n8n validation failed:', err);
+    alert('Sorry—could not validate your EngageCX access right now.');
+    return;
+  }
 
-        if (!res.ok) {
-          const txt = await res.text().catch(()=>'');
-          throw new Error('n8n validation failed ' + res.status + (txt ? (': ' + txt) : ''));
-        }
+  // Prefer a prebuilt URL from n8n; otherwise build it from company + userId
+  window.engageCxLoginUrl = data.iframeUrl || (
+    'https://engagecx.clarityvoice.com/#/agentConsole/message'
+    + '?includeWs=true&autoLogon=true'
+    + `&company=${encodeURIComponent(data.company)}`
+    + `&userId=${encodeURIComponent(data.userId)}`
+    + '&topLayout=false&navigationStyle=TopLeft'
+  );
 
-        const payload = await res.json();
-        const { userId, token } = payload || {};
-        if (!userId || !token) throw new Error('Missing userId/token in n8n response');
-
-        // Build and stash the autologin URL for this session
-        window.engageCxLoginUrl =
-          `https://engagecx.clarityvoice.com/?autoLogon=true&userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}&topLayout=false&navigationStyle=TopLeft`;
-
-        // Now that we have a valid session target, inject the nav + render the page
-        window.startEngageCx();
+  // Inject the nav + render the page
+  window.startEngageCx();
+});
 
       } catch (err) {
         console.error('[EngageCX] Auto-login error:', err);
