@@ -172,6 +172,7 @@ function stopNavWatcher() {
 
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
+    $new.attr('style', 'display:list-item'); // ← add this
     $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
     $new.find('.nav-text').text('EngageCX');
     $new.find('.nav-bg-image').removeAttr('style'); // keep it plain
@@ -180,14 +181,16 @@ function stopNavWatcher() {
     if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
 
     // clicking the nav renders our page (no auto-boot)
-    $(document).off('click.ecxNav', '#nav-engagecx, #nav-engagecx a')
-      .on('click.ecxNav', '#nav-engagecx, #nav-engagecx a', function (e) {
-        e.preventDefault();
-        $('#nav-buttons li').removeClass('nav-link-current');
-        $('#nav-engagecx').addClass('nav-link-current');
-        $('.navigation-title').text('EngageCX');
-        buildEcxPage();
-      });
+     
+  $(document).off('click.ecxViewPortal').on('click.ecxViewPortal', '#engagecx-view-portal', function (e) {
+    e.preventDefault();
+    ecxNavPinned = true;       // mark as pinned so the watcher keeps it around
+    ensureNavButton();         // add it now (if missing)
+    startNavWatcher();         // keep it present through future nav rebuilds
+    startNavKeeper();          // ← THIS LINE was missing!
+    $('#nav-engagecx').find('a').trigger('click');
+  });
+
   }
 
   // ---------- Apps menu (source of truth to launch) ----------
