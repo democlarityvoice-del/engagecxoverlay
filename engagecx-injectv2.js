@@ -1,4 +1,3 @@
-
 // ===================== EngageCX Apps → Auto-Login → Inject Nav + Iframe =====================
 ;(function () {
   // ---------- tiny utilities ----------
