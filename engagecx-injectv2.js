@@ -106,6 +106,9 @@ function startNavKeeper() {
       }
       #engagecx-slot{position:relative;overflow:auto}
       #engagecxFrame{border:none;width:100%;height:calc(100vh - 240px);min-height:800px}
+      #nav-buttons .engagecx-persist {
+      display: list-item !important;
+      }
     `;
     const s = document.createElement('style');
     s.id = 'ecx-css';
@@ -174,13 +177,14 @@ function startNavKeeper() {
     if ($('#nav-engagecx').length) return;
 
     // pick any existing nav li as a template
-    let $template = $('#nav-callhistory'); 
+    let $template = $('#nav-music'); // ← more stable anchor
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
 
     const $new = $template.clone();
     $new.attr('id', 'nav-engagecx');
-    $new.attr('style', 'display:list-item'); // ✅ ← add this line
+    $new.attr('style', 'display:list-item');           // ← force proper layout
+    $new.addClass('engagecx-persist');                 // ← optional, for future styling control
     $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
     $new.find('.nav-text').text('EngageCX');
     $new.find('.nav-bg-image').removeAttr('style'); // keep it plain
