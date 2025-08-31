@@ -11,17 +11,68 @@
   function jq() { return window.jQuery || window.$; }
 
   // ---------- derive portal user + domain safely ----------
-  function getPortalIdentity($) {
-    let user = ($('#nav-user-dropdown .username').text() || '').trim();
-    if (!user) user = ($('#nav-user-dropdown .usernameSmall').text() || '').trim();
-    // domain is the first label, e.g. abtesting.clarityvoice.com => abtesting
-    let host = (window.location.hostname || '').toLowerCase();
-    let domain = host.split('.')[0] || '';
-    // optional: if your portal writes a data attribute, prefer that
-    const hinted = $('#content,[data-portal-domain]').attr('data-portal-domain');
-    if (hinted && typeof hinted === 'string') domain = hinted.trim();
-    return { user, domain };
+ function getPortalIdentity($) {
+  const norm = s => (s || '').replace(/\s+/g,' ').trim();
+  const vis  = el => {
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    return r.width > 0 && r.height > 0 &&
+           cs.display !== 'none' && cs.visibility !== 'hidden' &&
+           parseFloat(cs.opacity || '1') > 0.01;
+  };
+
+  // 1) If truly masquerading, the banner is ground truth
+  const masq = Array.from(document.querySelectorAll('body *'))
+    .find(el => vis(el) && /Masquerading as/i.test(norm(el.textContent)));
+  if (masq) {
+    const t = norm(masq.textContent);
+    const m = t.match(/\(([0-9]+)\)\s*of\s+([a-z0-9._-]+)/i) ||
+              t.match(/Masquerading as\s+([a-z0-9._-]+)@([a-z0-9._-]+)/i);
+    if (m) return { user: m[1], domain: m[2].toLowerCase() };
   }
+
+  // 2) Header username chip “… (token)” → user
+  const headerRoot =
+    document.querySelector('#nav-user-dropdown') ||
+    document.querySelector('header, #header, .navbar, .topbar') ||
+    document.body;
+
+  const chip = Array.from(headerRoot.querySelectorAll('a,span,div,button,li'))
+    .filter(el => vis(el) && /\([a-z0-9._-]{2,30}\)/i.test(norm(el.textContent)))
+    .map(el => {
+      const t = norm(el.textContent);
+      const m = t.match(/\(([a-z0-9._-]{2,30})\)/i);
+      const r = el.getBoundingClientRect();
+      const fs = parseFloat(getComputedStyle(el).fontSize) || 0;
+      return m ? { user: m[1], score: r.right + fs - r.top } : null;
+    })
+    .filter(Boolean)
+    .sort((a,b) => b.score - a.score)[0];
+
+  let user = chip ? chip.user : '';
+  let domain = '';
+
+  // 3) Resolve domain only for THIS user via ns-<DOMAIN>-<USER> cookie
+  if (user) {
+    const names = document.cookie.split(';').map(s => s.trim().split('=')[0]);
+    const re = /^ns-([A-Z0-9-]+)-([A-Za-z0-9._-]+)$/i;
+    const hit = names
+      .map(n => n.match(re))
+      .filter(Boolean)
+      .map(m => ({ domain: m[1].toLowerCase(), user: m[2] }))
+      .find(c => c.user.toLowerCase() === user.toLowerCase());
+    if (hit) domain = hit.domain;
+  }
+
+  // 4) Last-resort domain (globals can be stale, but better than empty)
+  if (!domain) {
+    const g = String(window.current_domain || window.sub_domain || '').toLowerCase();
+    if (g) domain = g;
+  }
+
+  return { user, domain };
+}
 
   // ---------- dynamic login URL (filled after n8n validation) ----------
   function nextLoginUrl() {
