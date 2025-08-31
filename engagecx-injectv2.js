@@ -363,12 +363,6 @@ $(document).off('click.ecxViewPortal').on('click.ecxViewPortal', '#engagecx-view
   // Inject the nav + render the page
   window.startEngageCx();
 });
-
-      } catch (err) {
-        console.error('[EngageCX] Auto-login error:', err);
-        alert('Sorry—could not validate your EngageCX access right now.');
-      }
-    });
   }
 
   // ---------- boot when jQuery + Apps menu exist ----------
