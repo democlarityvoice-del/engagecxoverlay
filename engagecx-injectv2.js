@@ -14,16 +14,21 @@
   const ECX_CONTROL = 'https://engagecx.clarityvoice.com/#/admin/omni/dashboard?topLayout=false';
   const ECX_AGENT   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=TopLeft';
 
-  // iframe permissions we want to grant
+
+  // add near the other constants
+  const ECX_ORIGIN = 'https://engagecx.clarityvoice.com';
+
+// replace ECX_IFRAME_ALLOW with this:
   const ECX_IFRAME_ALLOW = [
-    'camera',
-    'microphone',
-    'clipboard-write',
-    'autoplay',
-    'encrypted-media',
-    'fullscreen',
-    'picture-in-picture',
-    'screen-wake-lock'
+    `camera ${ECX_ORIGIN}`,
+    `microphone ${ECX_ORIGIN}`,
+    `clipboard-write ${ECX_ORIGIN}`,
+    `autoplay ${ECX_ORIGIN}`,
+    `encrypted-media ${ECX_ORIGIN}`,
+    `fullscreen ${ECX_ORIGIN}`,
+    `picture-in-picture ${ECX_ORIGIN}`,
+    `screen-wake-lock ${ECX_ORIGIN}`,
+    `display-capture ${ECX_ORIGIN}` // for screen share prompts, harmless otherwise
   ].join('; ');
 
   // ---------- state ----------
