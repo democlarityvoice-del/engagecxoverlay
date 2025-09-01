@@ -14,7 +14,7 @@
   const ECX_CONTROL = 'https://engagecx.clarityvoice.com/#/admin/omni/dashboard?topLayout=false';
   const ECX_AGENT   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=TopLeft';
 
-  let ecxNavPinned = false;  // once user chooses View in portal, keep ECX in nav
+  let window.ecxNavPinned = false;  // once user chooses View in portal, keep ECX in nav
   let navObserver  = null;   // MutationObserver for nav rebuilds
 
 
@@ -59,7 +59,7 @@
 function startNavWatcher() {
   if (navObserver) return; // only one
   navObserver = new MutationObserver(() => {
-    if (!ecxNavPinned) return;
+    if (!window.ecxNavPinned) return;
     const nav = document.querySelector('#nav-buttons');
     if (nav && !document.getElementById('nav-engagecx')) {
       // nav got rebuilt and our item disappeared → re-add it
@@ -80,7 +80,7 @@ let navKeeper = null;
 function startNavKeeper() {
   if (navKeeper) return;
   navKeeper = setInterval(() => {
-    if (!ecxNavPinned) return;
+    if (!window.ecxNavPinned) return;
     const nav = document.querySelector('#nav-buttons');
     if (nav && !document.getElementById('nav-engagecx')) {
       ensureNavButton(); // <- re-add it if the portal nuked it
@@ -258,7 +258,7 @@ function startNavKeeper() {
     // View in portal → create nav + show tabs page (no SSO)
     $(document).off('click.ecxViewPortal').on('click.ecxViewPortal', '#engagecx-view-portal', function (e) {
       e.preventDefault();
-      ecxNavPinned = true;       // mark as pinned so the watcher keeps it around
+      window.ecxNavPinned = true;       // mark as pinned so the watcher keeps it around
      ensureNavButton();         // add it now (if missing)
      startNavWatcher();         // keep it present through future nav rebuilds
      startNavKeeper();          // << THIS is what was missing
