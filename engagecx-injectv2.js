@@ -172,7 +172,7 @@ function startNavKeeper() {
   }
 
   // ---------- optional left-nav entry (created only after “View in portal”) ----------
-function ensureNavButton() {
+ function ensureNavButton() {
   const $ = window.jQuery || window.$;
   if (!$('#nav-engagecx').length) {
     let $template = $('#nav-music');
@@ -184,23 +184,32 @@ function ensureNavButton() {
     $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
     $new.find('.nav-text').html('EngageCX');
 
-    // Mask the icon
-    $new.find('.nav-bg-image').css({
-      '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-      'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
-      '-webkit-mask-repeat': 'no-repeat',
-      'mask-repeat':         'no-repeat',
-      '-webkit-mask-position':'center 48%',
-      'mask-position':       'center 48%',
-      '-webkit-mask-size':   '71% 71%',
-      'mask-size':           '71% 71%',
-      'background-color':    'rgba(255,255,255,0.92)'
-    });
+    // ✅ Fix SVG icon masking
+    const $icon = $new.find('.nav-bg-image');
+    $icon.removeAttr('class');
+    $icon.attr('style', `
+      width: 22px;
+      height: 22px;
+      -webkit-mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3');
+      mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3');
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center 48%;
+      mask-position: center 48%;
+      -webkit-mask-size: 71% 71%;
+      mask-size: 71% 71%;
+      background-color: rgba(255,255,255,0.92);
+    `);
 
+    // ✅ Ensure correct inline placement
     const $after = $('#nav-callhistory');
-    if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
+    if ($after.length) {
+      $new.insertAfter($after);
+    } else {
+      $('#nav-buttons').append($new); // safer than .appendTo()
+    }
 
-    // Hook up click to load EngageCX view
+    // Attach click handler to show EngageCX view
     $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
       .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
         e.preventDefault();
