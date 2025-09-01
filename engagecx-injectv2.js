@@ -14,7 +14,12 @@
   const ECX_CONTROL = 'https://engagecx.clarityvoice.com/#/admin/omni/dashboard?topLayout=false';
   const ECX_AGENT   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=TopLeft';
 
-  window.ecxNavPinned = false;  // once user chooses View in portal, keep ECX in nav
+  // restore persisted pin (per-tab, survives reloads in this tab)
+  window.ecxNavPinned = sessionStorage.getItem('ecxPinned') === 'true';
+  sessionStorage.setItem('ecxPinned', 'true');
+
+
+ // once user chooses View in portal, keep ECX in nav
   let navObserver  = null;   // MutationObserver for nav rebuilds
 
 
@@ -81,12 +86,19 @@ function startNavKeeper() {
   if (navKeeper) return;
   navKeeper = setInterval(() => {
     if (!window.ecxNavPinned) return;
-    const nav = document.querySelector('#nav-buttons');
-    if (nav && !document.getElementById('nav-engagecx')) {
-      ensureNavButton(); // <- re-add it if the portal nuked it
+
+    // Re-add button if nuked
+    if (!document.getElementById('nav-engagecx')) {
+      ensureNavButton();
     }
-  }, 750); // mild cadence to avoid thrash
+
+    // Re-start the MutationObserver if it died
+    if (!navObserver) {
+      startNavWatcher();
+    }
+  }, 750);
 }
+
 
   // ---------- styles (Inventory-style tabs; active tab = black text) ----------
   function injectCssOnce() {
@@ -291,5 +303,15 @@ function ensureNavButton() {
   }, true); // capture phase so we run before the portal handler
 
   // ---------- boot once Apps menu exists (no auto page render) ----------
-  when(() => jq() && jq()('#app-menu-list').length, injectAppsMenu);
+when(() => jq() && jq()('#app-menu-list').length, injectAppsMenu);
+
+// 🔁 Restore nav button if previously pinned
+if (window.ecxNavPinned) {
+  when(() => jq() && jq()('#nav-buttons').length, () => {
+    ensureNavButton();
+    startNavWatcher();
+    startNavKeeper();
+  });
+}
 })();
+
