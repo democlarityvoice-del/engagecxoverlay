@@ -23,8 +23,6 @@ window.ecxNavPinned = (
 
 
 
-
-
  // once user chooses View in portal, keep ECX in nav
   let navObserver  = null;   // MutationObserver for nav rebuilds
 
@@ -172,7 +170,6 @@ function startNavKeeper() {
       unparkEcxIframe($slot[0]); // move the existing one back in
     }
 
-    $slot[0].appendChild(ecxFrame);
 
   // Pin the nav only after ECX has actually loaded once
   ecxFrame.addEventListener('load', () => {
