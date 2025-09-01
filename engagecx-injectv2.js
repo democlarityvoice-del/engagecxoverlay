@@ -14,9 +14,15 @@
   const ECX_CONTROL = 'https://engagecx.clarityvoice.com/#/admin/omni/dashboard?topLayout=false';
   const ECX_AGENT   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=TopLeft';
 
-  // restore persisted pin (per-tab, survives reloads in this tab)
-  window.ecxNavPinned = sessionStorage.getItem('ecxPinned') === 'true';
-  sessionStorage.setItem('ecxPinned', 'true');
+
+// At top (initial state):
+window.ecxNavPinned = (
+  sessionStorage.getItem('ecxPinned') === 'true' &&
+  document.cookie.includes('access_token=')
+);
+
+
+
 
 
  // once user chooses View in portal, keep ECX in nav
@@ -166,6 +172,15 @@ function startNavKeeper() {
       unparkEcxIframe($slot[0]); // move the existing one back in
     }
 
+    $slot[0].appendChild(ecxFrame);
+
+  // Pin the nav only after ECX has actually loaded once
+  ecxFrame.addEventListener('load', () => {
+    if (!window.ecxNavPinned) {
+      window.ecxNavPinned = true;
+      sessionStorage.setItem('ecxPinned','true');
+    }
+  }, { once: true });
 
 
     // tab behavior (toggle active class + swap src)
@@ -302,16 +317,18 @@ function ensureNavButton() {
     }
   }, true); // capture phase so we run before the portal handler
 
-  // ---------- boot once Apps menu exists (no auto page render) ----------
+// ---------- boot once Apps menu exists (no auto page render) ----------
 when(() => jq() && jq()('#app-menu-list').length, injectAppsMenu);
 
-// 🔁 Restore nav button if previously pinned
-if (window.ecxNavPinned) {
-  when(() => jq() && jq()('#nav-buttons').length, () => {
+// Backstop: if DOM gets rebuilt and our button disappears, restore it + watcher
+setInterval(() => {
+  if (window.ecxNavPinned &&
+      !document.getElementById('nav-engagecx') &&
+      document.getElementById('nav-buttons')) {
     ensureNavButton();
     startNavWatcher();
-    startNavKeeper();
-  });
-}
+  }
+}, 2500);
 })();
+
 
