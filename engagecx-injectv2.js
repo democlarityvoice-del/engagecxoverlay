@@ -106,7 +106,10 @@ function startNavKeeper() {
       }
       #engagecx-slot{position:relative;overflow:auto}
       #engagecxFrame{border:none;width:100%;height:calc(100vh - 240px);min-height:800px}
-      #nav-buttons .engagecx-persist {
+
+      /* keep ECX nav visible even if the portal toggles it */
+      #nav-buttons li.engagecx-persist { display: list-item !important; }
+
       display: list-item !important;
       }
     `;
@@ -172,54 +175,61 @@ function startNavKeeper() {
   }
 
   // ---------- optional left-nav entry (created only after “View in portal”) ----------
- function ensureNavButton() {
-  const $ = window.jQuery || window.$;
+function ensureNavButton() {
+  const $ = jq(); if (!$) return;
+  const $buttons = $('#nav-buttons'); if (!$buttons.length) return;
+
   if (!$('#nav-engagecx').length) {
-    let $template = $('#nav-music');
-    if (!$template.length) $template = $('#nav-buttons').children('li').first();
+    // clone an existing nav li so structure/classes stay intact
+    let $template = $('#nav-callhistory');
+    if (!$template.length) $template = $buttons.children('li').first();
     if (!$template.length) return;
 
     const $new = $template.clone();
-    $new.attr('id', 'nav-engagecx');
-    $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
-    $new.find('.nav-text').html('EngageCX');
+    $new.attr('id', 'nav-engagecx')
+        .addClass('engagecx-persist');   // <- mark as persistent so CSS can force visible
 
-    // ✅ Fix SVG icon masking
+    const $a = $new.find('a').first();
+    $a.attr('id', 'nav-engagecx-link')
+      .attr('href', '#')
+      .attr('aria-label', 'EngageCX');
+
+    // label
+    $new.find('.nav-text').text('EngageCX');
+
+    // ICON: DO NOT remove classes; just apply the mask + color
     const $icon = $new.find('.nav-bg-image');
-    $icon.removeAttr('class');
-    $icon.attr('style', `
-      width: 22px;
-      height: 22px;
-      -webkit-mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3');
-      mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3');
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-position: center 48%;
-      mask-position: center 48%;
-      -webkit-mask-size: 71% 71%;
-      mask-size: 71% 71%;
-      background-color: rgba(255,255,255,0.92);
-    `);
+    $icon.css({
+      '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+      'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+      '-webkit-mask-repeat':'no-repeat',
+      'mask-repeat':        'no-repeat',
+      '-webkit-mask-position':'center 48%',
+      'mask-position':      'center 48%',
+      '-webkit-mask-size':  '71% 71%',
+      'mask-size':          '71% 71%',
+      'background-color':   'rgba(255,255,255,0.92)'
+    });
 
-    // ✅ Ensure correct inline placement
+    // place it in the same row (right after Call History if present)
     const $after = $('#nav-callhistory');
-    if ($after.length) {
-      $new.insertAfter($after);
-    } else {
-      $('#nav-buttons').append($new); // safer than .appendTo()
-    }
+    if ($after.length) $new.insertAfter($after); else $buttons.append($new);
 
-    // Attach click handler to show EngageCX view
+    // click handler to show EngageCX view
     $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
       .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
         e.preventDefault();
         $('#nav-buttons li').removeClass('nav-link-current');
         $('#nav-engagecx').addClass('nav-link-current');
         $('.navigation-title').text('EngageCX');
-        buildEcxPage(); // your existing logic to show iframe with tabs
+        buildEcxPage();
       });
+  } else {
+    // if it exists but the portal hid it, unhide and persist
+    $('#nav-engagecx').addClass('engagecx-persist').css('display','list-item');
   }
 }
+
 
 
   // ---------- Apps menu (source of truth to launch) ----------
