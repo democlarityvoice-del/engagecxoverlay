@@ -172,47 +172,46 @@ function startNavKeeper() {
   }
 
   // ---------- optional left-nav entry (created only after “View in portal”) ----------
-  function ensureNavButton() {
-    const $ = jq(); if (!$) return;
-    if ($('#nav-engagecx').length) return;
-
-    // pick any existing nav li as a template
-    let $template = $('#nav-music'); // ← more stable anchor
+function ensureNavButton() {
+  const $ = window.jQuery || window.$;
+  if (!$('#nav-engagecx').length) {
+    let $template = $('#nav-music');
     if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
 
-    const $icon = $new.find('.nav-bg-image');
-    $icon.removeAttr('class');
-    $icon.attr('style', `
-      width: 22px;
-      height: 22px;
-      -webkit-mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/refs/heads/main/message-regular-full.svg');
-      mask-image: url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/refs/heads/main/message-regular-full.svg');
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-position: center;
-      mask-position: center;
-      -webkit-mask-size: contain;
-      mask-size: contain;
-      background-color: rgba(255, 255, 255, 0.95);
-      display: inline-block;
-    `);
+    const $new = $template.clone();
+    $new.attr('id', 'nav-engagecx');
+    $new.find('a').attr('id', 'nav-engagecx-link').attr('href', '#');
+    $new.find('.nav-text').html('EngageCX');
 
-
+    // Mask the icon
+    $new.find('.nav-bg-image').css({
+      '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+      'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+      '-webkit-mask-repeat': 'no-repeat',
+      'mask-repeat':         'no-repeat',
+      '-webkit-mask-position':'center 48%',
+      'mask-position':       'center 48%',
+      '-webkit-mask-size':   '71% 71%',
+      'mask-size':           '71% 71%',
+      'background-color':    'rgba(255,255,255,0.92)'
+    });
 
     const $after = $('#nav-callhistory');
     if ($after.length) $new.insertAfter($after); else $new.appendTo($('#nav-buttons'));
 
-    // clicking the nav renders our page (no auto-boot)
-    $(document).off('click.ecxNav', '#nav-engagecx, #nav-engagecx a')
-      .on('click.ecxNav', '#nav-engagecx, #nav-engagecx a', function (e) {
+    // Hook up click to load EngageCX view
+    $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
+      .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
         e.preventDefault();
         $('#nav-buttons li').removeClass('nav-link-current');
         $('#nav-engagecx').addClass('nav-link-current');
         $('.navigation-title').text('EngageCX');
-        buildEcxPage();
+        buildEcxPage(); // your existing logic to show iframe with tabs
       });
   }
+}
+
 
   // ---------- Apps menu (source of truth to launch) ----------
   function injectAppsMenu() {
