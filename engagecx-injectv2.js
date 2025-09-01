@@ -109,9 +109,8 @@ function startNavKeeper() {
 
       /* keep ECX nav visible even if the portal toggles it */
       #nav-buttons li.engagecx-persist { display: list-item !important; }
-
-      display: list-item !important;
-      }
+     
+      
     `;
     const s = document.createElement('style');
     s.id = 'ecx-css';
