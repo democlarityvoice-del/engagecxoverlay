@@ -16,10 +16,7 @@
 
 
 // At top (initial state):
-window.ecxNavPinned = (
-  sessionStorage.getItem('ecxPinned') === 'true' &&
-  document.cookie.includes('access_token=')
-);
+window.ecxNavPinned = sessionStorage.getItem('ecxPinned') === 'true';
 
 
 
@@ -316,6 +313,13 @@ function ensureNavButton() {
 
 // ---------- boot once Apps menu exists (no auto page render) ----------
 when(() => jq() && jq()('#app-menu-list').length, injectAppsMenu);
+
+when(() => jq() && jq()('#nav-buttons').length && window.ecxNavPinned, () => {
+  ensureNavButton();
+  startNavWatcher();
+  startNavKeeper();
+});
+
 
 // Backstop: if DOM gets rebuilt and our button disappears, restore it + watcher
 setInterval(() => {
