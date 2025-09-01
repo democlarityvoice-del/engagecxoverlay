@@ -107,9 +107,7 @@ function startNavKeeper() {
       #engagecx-slot{position:relative;overflow:auto}
       #engagecxFrame{border:none;width:100%;height:calc(100vh - 240px);min-height:800px}
 
-      /* keep ECX nav visible even if the portal toggles it */
-      #nav-buttons li.engagecx-persist { display: list-item !important; }
-     
+    
       
     `;
     const s = document.createElement('style');
@@ -181,17 +179,15 @@ function ensureNavButton() {
   if (!$('#nav-engagecx').length) {
     // clone an existing nav li so structure/classes stay intact
     let $template = $('#nav-callhistory');
-    if (!$template.length) $template = $buttons.children('li').first();
+    if (!$template.length) $template = $('#nav-buttons').children('li').first();
     if (!$template.length) return;
 
-    const $new = $template.clone();
-    $new.attr('id', 'nav-engagecx')
-        .addClass('engagecx-persist');   // <- mark as persistent so CSS can force visible
+    const baseDisplay = getComputedStyle($template[0]).display; // e.g., "flex" or "block"
 
-    const $a = $new.find('a').first();
-    $a.attr('id', 'nav-engagecx-link')
-      .attr('href', '#')
-      .attr('aria-label', 'EngageCX');
+    const $new = $template.clone();
+    $new.attr('id', 'nav-engagecx').addClass('engagecx-persist');
+    $new[0].style.display = baseDisplay; // match the row’s item display
+
 
     // label
     $new.find('.nav-text').text('EngageCX');
@@ -214,6 +210,15 @@ function ensureNavButton() {
     const $after = $('#nav-callhistory');
     if ($after.length) $new.insertAfter($after); else $buttons.append($new);
 
+    // NEW: observer to keep it visible
+    (function keepVisible(li, baseDisplay){
+      const obs = new MutationObserver(() => {
+        if (li.style && li.style.display === 'none') li.style.display = baseDisplay || '';
+        if (li.classList && li.classList.contains('hidden')) li.classList.remove('hidden');
+      });
+      obs.observe(li, { attributes:true, attributeFilter:['style','class'] });
+    })($new[0], baseDisplay);
+
     // click handler to show EngageCX view
     $(document).off('click.engagecx', '#nav-engagecx, #nav-engagecx a')
       .on('click.engagecx', '#nav-engagecx, #nav-engagecx a', function (e) {
@@ -225,9 +230,10 @@ function ensureNavButton() {
       });
   } else {
     // if it exists but the portal hid it, unhide and persist
-    $('#nav-engagecx').addClass('engagecx-persist').css('display','list-item');
+    $('#nav-engagecx').addClass('engagecx-persist').css('display',''); // clear inline display if portal hid i
   }
 }
+
 
 
 
