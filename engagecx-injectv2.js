@@ -14,7 +14,7 @@
   const ECX_CONTROL = 'https://engagecx.clarityvoice.com/#/admin/omni/dashboard?topLayout=false';
   const ECX_AGENT   = 'https://engagecx.clarityvoice.com/#/agentConsole/message/index?includeWs=true&topLayout=false&navigationStyle=TopLeft';
 
-  let window.ecxNavPinned = false;  // once user chooses View in portal, keep ECX in nav
+  window.ecxNavPinned = false;  // once user chooses View in portal, keep ECX in nav
   let navObserver  = null;   // MutationObserver for nav rebuilds
 
 
