@@ -332,4 +332,105 @@ setInterval(() => {
 }, 2500);
 })();
 
+// ===== ECX NAV PERSIST HOTFIX (drop-in, no rewrites) =====
+;(function () {
+  const jq = () => window.jQuery || window.$;
+
+  function addEcxNav() {
+    const $ = jq(); if (!$) return;
+    const $buttons = $('#nav-buttons'); if (!$buttons.length) return;
+
+    // If it already exists, unhide and normalize layout (stay on top row)
+    const have = document.getElementById('nav-engagecx');
+    if (have) {
+      have.style.display = ''; have.style.visibility = '';
+      $(have).css({ flex: '0 0 auto' });
+      return;
+    }
+
+    // Find a stable template from the FIRST ROW, so we don't wrap to a new line
+    const $lis = $buttons.children('li:visible');
+    if (!$lis.length) return;
+    const top0 = $lis.first()[0].getBoundingClientRect().top;
+    const $row = $lis.filter(function () {
+      return this.getBoundingClientRect().top === top0;
+    });
+
+    let $template = $row.filter('#nav-callhistory').first();
+    if (!$template.length) $template = $row.first();
+    if (!$template.length) $template = $lis.first();
+
+    const baseDisplay = getComputedStyle($template[0]).display || '';
+
+    const $new = $template.clone(false, false);
+    $new.attr('id', 'nav-engagecx')
+        .removeClass('nav-link-current')
+        .css({ display: baseDisplay, flex: '0 0 auto', visibility: '' });
+
+    // Label
+    $new.find('.nav-text').text('EngageCX');
+
+    // Icon mask (don’t remove classes; just overlay the mask/color)
+    const $icon = $new.find('.nav-bg-image');
+    if ($icon.length) {
+      $icon.css({
+        '-webkit-mask-image': "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+        'mask-image':         "url('https://raw.githubusercontent.com/democlarityvoice-del/engagecxicon/main/message-regular-full.svg?v=3')",
+        '-webkit-mask-repeat':'no-repeat',
+        'mask-repeat':        'no-repeat',
+        '-webkit-mask-position':'center 48%',
+        'mask-position':      'center 48%',
+        '-webkit-mask-size':  '71% 71%',
+        'mask-size':          '71% 71%',
+        'background-color':   'rgba(255,255,255,0.92)'
+      });
+    }
+
+    // Insert right after Call History if it’s on the same top row; else append to that row
+    const $after = $('#nav-callhistory');
+    if ($after.length && $after[0].getBoundingClientRect().top === top0) {
+      $new.insertAfter($after);
+    } else {
+      $row.last().after($new);
+    }
+
+    // Keep it visible if portal tries to hide it via style/class flips
+    new MutationObserver(() => {
+      if ($new[0].style.display === 'none') $new[0].style.display = baseDisplay || '';
+      if ($new[0].classList.contains('hidden')) $new[0].classList.remove('hidden');
+    }).observe($new[0], { attributes: true, attributeFilter: ['style', 'class'] });
+
+    // Click → render ECX page using your existing function
+    $(document).off('click.ecxNavHF', '#nav-engagecx, #nav-engagecx a')
+      .on('click.ecxNavHF', '#nav-engagecx, #nav-engagecx a', function (e) {
+        e.preventDefault();
+        $('#nav-buttons li').removeClass('nav-link-current');
+        $('#nav-engagecx').addClass('nav-link-current');
+        $('.navigation-title').text('EngageCX');
+        if (typeof buildEcxPage === 'function') buildEcxPage();
+      });
+  }
+
+  // Mark as pinned when “View in Portal” is clicked (so persistence survives page reloads)
+  $(document).off('click.ecxPinHF', '#engagecx-view-portal')
+    .on('click.ecxPinHF', '#engagecx-view-portal', function () {
+      window.ecxNavPinned = true;
+      try { sessionStorage.setItem('ecxPinned', 'true'); } catch {}
+    });
+
+  // If previously pinned this session, resurrect the button ASAP after the nav renders
+  if (sessionStorage.getItem('ecxPinned') === 'true') {
+    window.ecxNavPinned = true;
+    const boot = setInterval(() => {
+      if (jq() && jq()('#nav-buttons').length) { addEcxNav(); clearInterval(boot); }
+    }, 200);
+  }
+
+  // Keep-alive every 750ms: if pinned and button missing (or nav rebuilt), re-add it
+  setInterval(() => {
+    if (!window.ecxNavPinned) return;
+    if (!document.getElementById('nav-buttons')) return;
+    addEcxNav();
+  }, 750);
+})();
 
