@@ -1,24 +1,19 @@
-function waitForClarityAndRun() {
-  if (typeof clarity !== 'undefined' && clarity?.ui?.get) {
-    try {
-      const dropdownUrl = clarity.ui.get('PORTAL_SHOW_CLARITY_ENGAGECX_DROPDOWN_BTN');
-      if (dropdownUrl?.startsWith('http')) {
-        const s = document.createElement('script');
-        s.src = dropdownUrl;
-        s.onload = () => console.log('[Dropdown Loader] Loaded:', dropdownUrl);
-        s.onerror = () => console.error('[Dropdown Loader] Failed to load:', dropdownUrl);
-        document.head.appendChild(s);
-      } else {
-        console.warn('[Dropdown Loader] No valid dropdown URL set.');
-      }
-    } catch (e) {
-      console.error('[Dropdown Loader] Error while loading dropdown script:', e);
+// Auto-load EngageCX Apps Dropdown Script from UI Config
+(async function() {
+  try {
+    const config = window?.clarity?.uiConfigs?.find(c => c.param === "dropdownLoader");
+    if (!config || !config.value) {
+      console.warn("[Dropdown Loader] No dropdownLoader param found in UI config.");
+      return;
     }
-  } else {
-    // Retry in 100ms
-    setTimeout(waitForClarityAndRun, 100);
-  }
-}
 
-// Start waiting
-waitForClarityAndRun();
+    const script = document.createElement("script");
+    script.src = config.value;
+    script.onload = () => console.log("[Dropdown Loader] Script loaded successfully:", config.value);
+    script.onerror = (e) => console.error("[Dropdown Loader] Failed to load script:", config.value, e);
+    document.head.appendChild(script);
+  } catch (err) {
+    console.error("[Dropdown Loader] Error while loading dropdown script", err);
+  }
+})();
+
