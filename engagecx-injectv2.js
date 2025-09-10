@@ -17,10 +17,9 @@
     const response = await netsapiens.api.post({
       object: "uiconfig",
       action: "read",
-      domain: domain,
-      reseller: reseller,
+      domain: sub_domain,     
       config_name: "PORTAL_SHOW_CLARITY_ENGAGECX_DROPDOWN_BTN",
-      user: user
+      user: sub_user,
     });
 
     // Check if the config is enabled
